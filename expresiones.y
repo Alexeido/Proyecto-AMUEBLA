@@ -7,7 +7,8 @@
 using namespace std;
 
 //elementos externos al analizador sintácticos por haber sido declarados en el analizador léxico      			
-extern int n_lineas;
+extern int n_lineas;    			
+extern int debug;
 extern int yylex();
 bool errorSemantico=false;
 char msgMid[400];
@@ -20,7 +21,9 @@ extern FILE* yyout;
 
 //definición de procedimientos auxiliares
 void yyerror(const char* s){         /*    llamada por cada error sintactico de yacc */
-	cout << "Error sintáctico en la instrucción "<< n_lineas+1<<endl;	
+	
+      if(debug!=1)
+        cout << "Error sintáctico en la instrucción "<< n_lineas+1<<endl;	
       errorSemantico=false;
 } 
 
@@ -28,7 +31,8 @@ void yyerror(const char* s){         /*    llamada por cada error sintactico de 
 
 bool semanticError(){
       if(errorSemantico){
-            cout<<"Error semántico en la instrucción "<<n_lineas<<": "<<msgError<<endl;
+            if(debug!=1)
+                cout<<"Error semántico en la instrucción "<<n_lineas<<": "<<msgError<<endl;
             errorSemantico=false;
             return true;
       }
@@ -39,7 +43,8 @@ bool semanticError(){
 
 
 bool semanticError(const char *msg){
-      cout<<"Error semántico en la instrucción "<<n_lineas<<": "<<msg<<endl;
+      if(debug!=1)
+        cout<<"Error semántico en la instrucción "<<n_lineas<<": "<<msg<<endl;
       errorSemantico=false;
       
       return true;
@@ -56,6 +61,7 @@ void setError(const char *msg){
 	int   c_entero;
 	float c_real;
 	char  c_cadena[20];
+	char*  c_string;
       bool  c_bool;
       struct {
             float valor;
@@ -67,8 +73,10 @@ void setError(const char *msg){
 %token <c_entero> NUMERO
 %token <c_real> REAL  
 %token <c_cadena> ID
+%token <c_cadena> CADENA
 %token <c_bool> CIERTO FALSO
 %token ASIGNATION SALIR NO EQ MENEQ MAYEQ DISTINCT AND OR INTDIV
+%token VARIABLES MUEBLES HABITACION FINHABITACION RECTANGULO CIRCULO decENTERO decREAL decBOOL SITUAR PAUSA MENSAJE
 %type <c_expresion> expr
 %type <c_bool> exBool 
 
@@ -230,6 +238,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
      
+     //yylex();
      yyparse();
 
     // Abre el archivo de salida

@@ -8,7 +8,7 @@
 
 # ejecutar con > make -f makeAmuebla
 
-FUENTE = basica.cpp
+FUENTE = salidaAmu.cpp
 
 fin: prueba
 	./prueba 

@@ -9,7 +9,8 @@ OBJ = expresiones.o lexico.o amueblalib.o
 expresiones : $(OBJ)     				#segunda fase de la traducción. Generación del código ejecutable 
 	g++ -oexpresiones $(OBJ)
 	./expresiones ./entrada.amu
-	rm ./expresiones
+#make -f makeAmuebla
+#rm ./expresiones
 
 expresiones.o : expresiones.c        	#primera fase de la traducción del analizador sintáctico
 	g++ -c -Wno-deprecated -oexpresiones.o  expresiones.c 
