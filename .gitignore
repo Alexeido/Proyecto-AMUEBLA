@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+basica.cpp
+expresiones
+expresiones.c
+expresiones.h
+expresiones.output
+lex.yy.c
+salida.txt
+entrada.txt
+entrada.amu
+salidaAmu.cpp
