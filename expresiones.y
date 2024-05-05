@@ -72,11 +72,14 @@ void setError(const char *msg){
 %start entrada
 %token <c_entero> NUMERO
 %token <c_real> REAL  
-%token <c_cadena> ID
-%token <c_cadena> CADENA
+%token <c_cadena> ID NOMBRE
+%token <c_string> CADENA
 %token <c_bool> CIERTO FALSO
 %token ASIGNATION SALIR NO EQ MENEQ MAYEQ DISTINCT AND OR INTDIV
-%token VARIABLES MUEBLES HABITACION FINHABITACION RECTANGULO CIRCULO decENTERO decREAL decBOOL SITUAR PAUSA MENSAJE
+%token VARIABLES MUEBLES HABITACION FINHABITACION 
+%token RECTANGULO CIRCULO NEGRO GRIS ROJO AZUL AMARILLO VERDE MARRON
+%token decENTERO decREAL decBOOL 
+%token SITUAR PAUSA MENSAJE
 %type <c_expresion> expr
 %type <c_bool> exBool 
 
@@ -227,7 +230,7 @@ int main(int argc, char* argv[]) {
      n_lineas = 0;
 
     if (argc != 2) {
-        cout << "Uso: " << argv[0] << " <archivo_entrada> <archivo_salida>" << endl;
+        cout << "Uso: " << argv[0] << " <archivo_entrada>" << endl;
         return 1;
     }
 

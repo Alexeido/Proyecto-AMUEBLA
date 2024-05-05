@@ -21,6 +21,8 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 "<="                             if(debug) printf("<= "); return MENEQ;  // Agregar regla para reconocer menor igual
 ">="                             if(debug) printf(">= "); return MAYEQ;  // Agregar regla para reconocer mayor igual
 "//"                             if(debug) printf("// "); return INTDIV;
+
+
 [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]                    if(debug) printf("VARIABLES ");     return VARIABLES;
 [Mm][Uu][Ee][Bb][Ll][Ee][Ss]                            if(debug) printf("MUEBLES ");       return MUEBLES;
 [Hh][Aa][Bb][Ii][Tt][Aa][Cc][Ii][Oo][Nn]                if(debug) printf("HABITACION ");    return HABITACION;
@@ -28,6 +30,13 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 
 [Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("RECTANGULO "); return RECTANGULO;
 [Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("CIRCULO "); return CIRCULO; 
+"negro"                                                 if(debug) printf("NEGRO "); return NEGRO;
+"gris"                                                  if(debug) printf("GRIS "); return GRIS;
+"rojo"                                                  if(debug) printf("ROJO "); return ROJO;
+"azul"                                                  if(debug) printf("AZUL "); return AZUL;
+"amarillo"                                              if(debug) printf("AMARILLO "); return AMARILLO;
+"verde"                                                 if(debug) printf("VERDE "); return VERDE;
+"marron"                                                if(debug) printf("MARRON "); return MARRON;
 
 [Ee][Nn][Tt][Ee][Rr][Oo]                                if(debug) printf("decENTERO "); return decENTERO;
 [Rr][Ee][Aa][Ll]                                        if(debug) printf("decREAL "); return decREAL;
@@ -37,10 +46,11 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 [Pp][Aa][Uu][Ss][Aa]                                    if(debug) printf("PAUSA "); return PAUSA;
 [Mm][Ee][Nn][Ss][Aa][Jj][Ee]                            if(debug) printf("MENSAJE "); return MENSAJE;
 
+[A-ZÁÉÍÓÚüÜ][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("NOMBRE "); return NOMBRE;
+[a-záéíóú][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("ID "); return ID;
 
 [Cc][Ii][Ee][Rr][Tt][Oo]        { yylval.c_bool = true; if(debug) printf("CIERTO "); return CIERTO; }
 [Ff][Aa][Ll][Ss][Oo]            { yylval.c_bool = false; if(debug) printf("FALSO "); return FALSO; }
-[A-Za-z_áéíóúÁÉÍÓÚüÜ][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("ID "); return ID;
 [0-9]+                          yylval.c_entero = atoi(yytext); if(debug) printf("INT "); return NUMERO;
 [0-9]*"."[0-9]+                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 [0-9]+"."[0-9]*                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
