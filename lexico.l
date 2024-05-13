@@ -46,12 +46,13 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 [Pp][Aa][Uu][Ss][Aa]                                    if(debug) printf("PAUSA "); return PAUSA;
 [Mm][Ee][Nn][Ss][Aa][Jj][Ee]                            if(debug) printf("MENSAJE "); return MENSAJE;
 
-[A-ZÁÉÍÓÚüÜ][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("NOMBRE "); return NOMBRE;
-[a-záéíóú][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("ID "); return ID;
-
 [Cc][Ii][Ee][Rr][Tt][Oo]        { yylval.c_bool = true; if(debug) printf("CIERTO "); return CIERTO; }
 [Ff][Aa][Ll][Ss][Oo]            { yylval.c_bool = false; if(debug) printf("FALSO "); return FALSO; }
-[0-9]+                          yylval.c_entero = atoi(yytext); if(debug) printf("INT "); return NUMERO;
+[0-9]+                          yylval.c_entero = atoi(yytext); if(debug) printf("INT "); return NUMERO
+
+[A-ZÁÉÍÓÚüÜ][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("NOMBRE "); return NOMBRE;
+[a-záéíóú][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("ID "); return ID;
+;
 [0-9]*"."[0-9]+                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 [0-9]+"."[0-9]*                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 ([0-9]*[.][0-9]|[0-9][.][0-9]+)[eE][+-]?[0-9]+ yylval.c_real = atof(yytext); if(debug) printf("FFLOAT "); return REAL;

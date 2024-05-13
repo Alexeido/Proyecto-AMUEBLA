@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstring>
-#include "amueblalib.h"
+#include "tablavalores.h"
 
 using namespace std;
 

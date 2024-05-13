@@ -1,16 +1,15 @@
-#include "amueblalib.h"
+#include "tablavalores.h"
 #include <iostream>
 
 vars::vars() {
     total = 0;
     for (int i = 0; i < MAX; i++) {
         valores[i].nombre[0] = '\0';
-        fila[i] = 0;
     }
 }
 
 
-bool vars::putVar(char *name, int fila, int valor) {
+bool vars::putVar(char *name, int valor) {
     bool enc=false;
     bool inserted=false;
     int i=0;
@@ -29,7 +28,6 @@ bool vars::putVar(char *name, int fila, int valor) {
     }
     if(!enc){
         strcpy(valores[total].nombre, name);
-        this->fila[total] = fila;
         valores[total].tipo = TENTERO;
         valores[total].dato.entero = valor;
         total++;
@@ -38,7 +36,7 @@ bool vars::putVar(char *name, int fila, int valor) {
     return inserted;
 }
 
-bool vars::putVar(char *name, int fila, float valor) {
+bool vars::putVar(char *name, float valor) {
     bool enc=false;
     bool inserted=false;
     int i=0;
@@ -57,7 +55,6 @@ bool vars::putVar(char *name, int fila, float valor) {
     }
     if(!enc){
         strcpy(valores[total].nombre, name);
-        this->fila[total] = fila;
         valores[total].tipo = TREAL;
         valores[total].dato.real = valor;
         total++;
@@ -66,7 +63,7 @@ bool vars::putVar(char *name, int fila, float valor) {
     return inserted;
 }
 
-bool vars::putVar(char *name, int fila, char *valor) {
+bool vars::putVar(char *name, char *valor) {
     for (int i = 0; i < total; i++) {
         if (!strcmp(valores[i].nombre, name)) {
             if(valores[i].tipo!=TCADENA)
@@ -76,14 +73,13 @@ bool vars::putVar(char *name, int fila, char *valor) {
         }
     }
     strcpy(valores[total].nombre, name);
-    this->fila[total] = fila;
     valores[total].tipo = TCADENA;
     strcpy(valores[total].dato.cadena, valor);
     total++;
     return true;
 }
 
-bool vars::putVar(char *name, int fila, bool valor) {
+bool vars::putVar(char *name, bool valor) {
     for (int i = 0; i < total; i++) {
         if (!strcmp(valores[i].nombre, name)) {
             if(valores[i].tipo!=TBOOL)
@@ -93,7 +89,6 @@ bool vars::putVar(char *name, int fila, bool valor) {
         }
     }
     strcpy(valores[total].nombre, name);
-    this->fila[total] = fila;
     valores[total].tipo = TBOOL;
     valores[total].dato.booleano= valor;
     total++;
@@ -164,7 +159,6 @@ void vars::printVar() {
             default:
                 break;
         }
-        cout<<i<<"\t"<<fila[i]<<endl;
     }
     cout << endl;
 }
@@ -175,7 +169,6 @@ void vars::copiarVar(vars backup) {
     total = backup.total;
     for (int i = 0; i < MAX; i++) {
         strcpy(valores[i].nombre,backup.valores[i].nombre);
-        fila[i] = backup.fila[i];
         valores[i].tipo = backup.valores[i].tipo;
         valores[i].dato.real = backup.valores[i].dato.real;
     }

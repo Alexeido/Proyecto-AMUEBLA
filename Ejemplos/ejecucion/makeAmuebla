@@ -1,0 +1,26 @@
+# Fichero makeAmuebla
+# Para compilar y ejecutar un fichero .cpp resultante de la traducción de un 
+# fichero .amu
+
+# En la misma carpeta deben estar los ficheros de la librería amuebla.h y amuebla.cpp
+
+# Cambiar FUENTE con el nombre del fichero correspondiente
+
+# ejecutar con > make -f makeAmuebla
+
+FUENTE = basica.cpp
+
+fin: prueba
+	./prueba 
+	
+prueba : prueba.o amuebla.o 
+	g++ -oprueba amuebla.o prueba.o -lallegro -lallegro_primitives -lallegro_main    
+
+amuebla.o : amuebla.cpp
+	g++ -c amuebla.cpp
+
+prueba.o : $(FUENTE)
+	g++ -c -oprueba.o $(FUENTE) 
+
+clean :
+	rm -f *.o	

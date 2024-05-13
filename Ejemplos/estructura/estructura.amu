@@ -1,0 +1,25 @@
+%% Fichero de ejemplo de la estructura básica de bloques
+
+
+VARIABLES
+
+%% También debería funcionar si se comenta la línea anterior
+%% porque este bloque no es obligatorio
+
+MUEBLES
+
+
+
+%% Comienza la definición de las habitaciones
+
+HABITACION (100, 100) "PRIMERA habitación" :
+
+
+FINHABITACION 
+
+HABITACION (200, 200) "SEGUNDA habitación" :
+
+
+FINHABITACION 
+
+%% Y con esto acaba el programa
