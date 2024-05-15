@@ -131,7 +131,7 @@ void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_A
 %union{
     int   c_entero;
     float c_real;
-    char  c_cadena[MAX_STR_LEN];
+    char  c_cadena[20];
     char*  c_string; // Cambiado de char* a string
       bool  c_bool;
       struct {
@@ -141,7 +141,7 @@ void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_A
     int c_type;
     int c_color;
     int c_forma;
-    char seqIdentificadores[MAX_ARR_LEN][MAX_STR_LEN];
+    char seqIdentificadores[50][20];
 }
 
 %start inicio
@@ -170,27 +170,29 @@ void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_A
 %right NO
 
 %%
-inicio:           blVariables  blMuebles  
+inicio:           
+      |blVariables  blMuebles  
       ;
 
       blVariables:      
-                  |     VARIABLES   listaDeclaraciones  
-                  |     listaDeclaraciones  
+                  |     VARIABLES 	'\n'	  {cout<<"Variables"<<endl;}
+                  |     listaDeclaraciones  {cout<<"Lista declaraciones"<<endl;}
                   ;
 
             listaDeclaraciones:
-                              |     listaDeclaraciones declaracion
-                              |     declaracion  
-                              ;      
+                        |     declaracion  
+                        |     listaDeclaraciones declaracion
+                        |           error	'\n'			{yyerrok;}   
+                        ;           
+
 
 
                   declaracion:      TIPO seqIdentificadores '\n' {}
                               |     asignacion 
-                              |     error	'\n'			{yyerrok;}   
                               ;      
                   
-                        seqIdentificadores: ID { }
-                                          | seqIdentificadores ',' ID {  }
+                        seqIdentificadores: ID {cout<<$1<<", "; }
+                                          | seqIdentificadores ',' ID {cout<<$3<<", ";   }
                                           ;
 
       blMuebles:      MUEBLES   listaMuebles  
@@ -205,6 +207,7 @@ inicio:           blVariables  blMuebles
                               |     NOMBRE '=''<'FORMA','expr','COLOR'>''\n' {}
                               |     error	'\n'			{yyerrok;}   
                               ;      
+
 
 
 asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
@@ -247,6 +250,7 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
                                            } 
                                           }
             | TIPO ID ASIGNATION expr '\n'     {if(!semanticError()){
+                                                      cout<<"asignacion de tipo normal"<<endl;
                                                 if(!$4.esReal){
                                                       errorType=variables.decVar(toType($1),$2, (int)$4.valor);
                                                       if(errorType==-2){
@@ -268,6 +272,7 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
                                            } 
                                           }
             | TIPO ID ASIGNATION exBool '\n'     {if(!semanticError()){
+                                                      cout<<"asignacion de tipo booleano"<<endl;
                                                       errorType=variables.decVar(toType($1),$2, $4);
                                                       if(errorType==-2){
                                                             sprintf(msgMid, "A la variable %s no se le puede asignar un tipo Booleano", $2);
@@ -303,6 +308,7 @@ expr:   ID                   {actual=variables.getVar($1);
                               if (actual.tipo==TERROR){
                                     sprintf(msgMid, "La variable %s no está definida", actual.nombre);
                                     setError(msgMid);
+                                    //variables.printVar();
                               }
                               
                               else if(actual.tipo==TENTERO){
