@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstring>
-#include "tablavalores.h"
+#include "tablaValores.h"
 
 using namespace std;
 
@@ -102,7 +102,7 @@ linea: asignacion
 	;
 
 asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
-                                                if(!variables.putVar($1,n_lineas, $3)){
+                                                if(!variables.putVar($1, $3)){
                                                       setError("La variable no es de este tipo");
                                                 }
                                                 semanticError();
@@ -114,13 +114,13 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
 
             | ID ASIGNATION expr '\n'     {if(!semanticError()){
                                                 if(!$3.esReal){
-                                                      if(!variables.putVar($1,n_lineas, (int)$3.valor)){
+                                                      if(!variables.putVar($1, (int)$3.valor)){
                                                             sprintf(msgMid, "La variable %s es de tipo real y no se le puede asignar un valor entero", $1);
                                                             setError(msgMid);
 
                                                       }
                                                 } else{
-                                                      if(!variables.putVar($1,n_lineas, $3.valor)){
+                                                      if(!variables.putVar($1, $3.valor)){
                                                             sprintf(msgMid, "La variable %s es de tipo entero y no se le puede asignar un valor real", $1);
                                                             setError(msgMid);
                                                       }
@@ -129,6 +129,7 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
                                            } 
                                           }
             ;
+
 
 exBool:  CIERTO               {$$=true;}
        | FALSO                {$$=false;}

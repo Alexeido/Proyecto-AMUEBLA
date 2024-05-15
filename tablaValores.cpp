@@ -1,4 +1,4 @@
-#include "tablavalores.h"
+#include "tablaValores.h"
 #include <iostream>
 
 vars::vars() {

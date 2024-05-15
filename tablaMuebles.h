@@ -7,6 +7,29 @@
 #define MAX 100
 #define MAXchar 25
 
+
+enum formaMueble { FRECTANGULO, FCIRCULO};
+enum colorMueble { CNEGRO, CGRIS, CROJO, CAZUL, CAMARILLO, CVERDE, CMARRON};
+
+
+struct rectSize {
+    float ancho;
+    float alto;
+};
+
+union muebleSize {
+    float radio;
+    rectSize rect;
+};
+
+struct mueble {
+    formaMueble forma;
+    colorMueble color;
+    muebleSize medida;
+    char nombre[MAXchar];
+};
+
+
 /*
 
 
@@ -18,21 +41,6 @@ Mueble = < rectangulo, 200.0, 800.0, negro>
 */
 
 
-enum formaMueble { FRECTANGULO, FCIRCULO};
-enum colorMueble { CNEGRO, CGRIS, CROJO, CAZUL, CAMARILLO, CVERDE, CMARRON};
-
-struct sizes{
-    float radio;
-    float ancho;
-    float alto;
-};
-
-struct mueble {
-    formaMueble forma;
-    colorMueble color;
-    sizes medida;
-    char nombre[MAXchar];
-};
 
 class mueblesVars{
 private:
@@ -40,6 +48,7 @@ private:
     int total;
 
 public:
+
     mueblesVars(); // Constructor
     bool putMueble(char *name, formaMueble forma, colorMueble color, float ancho, float alto);
     bool putMueble(char *name, formaMueble forma, colorMueble color, float radio);

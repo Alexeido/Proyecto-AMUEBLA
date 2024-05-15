@@ -4,7 +4,7 @@
 
 all: expresiones
 
-OBJ = expresiones.o lexico.o amueblalib.o
+OBJ = expresiones.o lexico.o tablaValores.o tablaMuebles.o
 
 expresiones : $(OBJ)     				#segunda fase de la traducción. Generación del código ejecutable 
 	g++ -oexpresiones $(OBJ)
@@ -21,8 +21,11 @@ lexico.o : lex.yy.c						#primera fase de la traducción del analizador léxico
 expresiones.c : expresiones.y       	#obtenemos el analizador sintáctico en C
 	bison -d -v -oexpresiones.c expresiones.y
 
-amueblalib.o : amueblalib.cpp                # Compilar amueblalib.cpp
-	g++ -c -Wno-deprecated -o amueblalib.o amueblalib.cpp
+tablaMuebles.o : tablaMuebles.cpp                # Compilar tablaMuebles.cpp
+	g++ -c -Wno-deprecated -o tablaMuebles.o tablaMuebles.cpp
+
+tablaValores.o : tablaValores.cpp                # Compilar tablaValores.cpp
+	g++ -c -Wno-deprecated -o tablaValores.o tablaValores.cpp
 
 lex.yy.c: lexico.l						#obtenemos el analizador léxico en C
 	flex lexico.l
