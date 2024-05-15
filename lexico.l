@@ -2,6 +2,11 @@
 #include "expresiones.h"
 #include <stdio.h>
 #include <math.h>
+#include <vector>
+#include <string>
+#include <cstring>
+#include "tablaValores.h"
+#include "tablaMuebles.h"
 int n_lineas;
 int debug = 1; // Variable debug para controlar la impresión de mensajes de depuración
 %}
@@ -28,19 +33,22 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 [Hh][Aa][Bb][Ii][Tt][Aa][Cc][Ii][Oo][Nn]                if(debug) printf("HABITACION ");    return HABITACION;
 [Ff][Ii][Nn][Hh][Aa][Bb][Ii][Tt][Aa][Cc][Ii][Oo][Nn]    if(debug) printf("FINHABITACION "); return FINHABITACION;
 
-[Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("RECTANGULO "); return RECTANGULO;
-[Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("CIRCULO "); return CIRCULO; 
-"negro"                                                 if(debug) printf("NEGRO "); return NEGRO;
-"gris"                                                  if(debug) printf("GRIS "); return GRIS;
-"rojo"                                                  if(debug) printf("ROJO "); return ROJO;
-"azul"                                                  if(debug) printf("AZUL "); return AZUL;
-"amarillo"                                              if(debug) printf("AMARILLO "); return AMARILLO;
-"verde"                                                 if(debug) printf("VERDE "); return VERDE;
-"marron"                                                if(debug) printf("MARRON "); return MARRON;
 
-[Ee][Nn][Tt][Ee][Rr][Oo]                                if(debug) printf("decENTERO "); return decENTERO;
-[Rr][Ee][Aa][Ll]                                        if(debug) printf("decREAL "); return decREAL;
-[Bb][Oo][Oo][Ll]                                        if(debug) printf("decBOOL "); return decBOOL;
+
+
+[Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("FORMAr "); return FORMA; yylval.c_forma=0;   
+[Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("FORMAc "); return FORMA; yylval.c_forma=1;
+"negro"                                                 if(debug) printf("COLORn "); return COLOR; yylval.c_color=0;
+"gris"                                                  if(debug) printf("COLORg "); return COLOR; yylval.c_color=1;
+"rojo"                                                  if(debug) printf("COLORr "); return COLOR; yylval.c_color=2;
+"azul"                                                  if(debug) printf("COLORaz "); return COLOR; yylval.c_color=3;
+"amarillo"                                              if(debug) printf("COLORam "); return COLOR; yylval.c_color=4;
+"verde"                                                 if(debug) printf("COLORv "); return COLOR; yylval.c_color=5;
+"marron"                                                if(debug) printf("COLORm "); return COLOR; yylval.c_color=6;
+
+[Ee][Nn][Tt][Ee][Rr][Oo]                                if(debug) printf("TIPOi "); return TIPO; yylval.c_type=0;
+[Rr][Ee][Aa][Ll]                                        if(debug) printf("TIPOr "); return TIPO; yylval.c_type=1;
+[Bb][Oo][Oo][Ll]                                        if(debug) printf("TIPOb "); return TIPO; yylval.c_type=2;
 
 [Ss][Ii][Tt][Uu][Aa][Rr]                                if(debug) printf("SITUAR "); return SITUAR;
 [Pp][Aa][Uu][Ss][Aa]                                    if(debug) printf("PAUSA "); return PAUSA;
@@ -56,8 +64,7 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 [0-9]*"."[0-9]+                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 [0-9]+"."[0-9]*                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 ([0-9]*[.][0-9]|[0-9][.][0-9]+)[eE][+-]?[0-9]+ yylval.c_real = atof(yytext); if(debug) printf("FFLOAT "); return REAL;
-\"[^\"\n]*\"                    {yylval.c_string = strdup(yytext); if(debug) printf("CADENA "); return CADENA;}
-
+"\"[^\"\n]*\"" { yylval.c_string = strdup(yytext); if(debug) printf("CADENA "); return CADENA; }
 
 
 \n                              n_lineas++; if (debug) printf("\n"); return (yytext[0]); // Nueva línea

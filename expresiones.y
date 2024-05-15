@@ -1,8 +1,11 @@
 %{
 #include <iostream>
 #include <cmath>
+#include <string>
 #include <cstring>
+#include <vector>
 #include "tablaValores.h"
+#include "tablaMuebles.h"
 
 using namespace std;
 
@@ -11,14 +14,17 @@ extern int n_lineas;
 extern int debug;
 extern int yylex();
 bool errorSemantico=false;
+const int MAX_STR_LEN = 20;
+const int MAX_ARR_LEN = 50;
+
 char msgMid[400];
+int errorType;
 char msgError[400];
 vars variables;
 vars variablesBackUp;
 ValorVariable actual;
 extern FILE* yyin;
 extern FILE* yyout;
-
 //definición de procedimientos auxiliares
 void yyerror(const char* s){         /*    llamada por cada error sintactico de yacc */
 	
@@ -56,20 +62,89 @@ void setError(const char *msg){
 }
 
 
+
+
+TipoVariable toType(int tipo){
+    switch (tipo)
+    {
+    case 0:
+        return TENTERO;
+    case 1:
+        return TREAL;
+    case 2:
+        return TBOOL;
+    case 3:
+        return TCADENA;
+    default:
+        return TERROR;
+    }
+
+}
+
+colorMueble toColor(int color){
+    switch (color)
+    {
+    case 0:
+        return CNEGRO;
+    case 1:
+        return CGRIS;
+    case 2:
+        return CROJO;
+    case 3:
+        return CAZUL;
+    case 4:
+        return CAMARILLO;
+    case 5:
+        return CVERDE;
+    case 6:
+        return CMARRON;
+    default:
+        return CNEGRO;
+    }
+}
+
+formaMueble toForma(int forma){
+    switch (forma)
+    {
+    case 0:
+        return FRECTANGULO;
+    case 1:
+        return FCIRCULO;
+    default:
+        return FRECTANGULO;
+    }
+}
+
+void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_ARR_LEN][MAX_STR_LEN], const char put[MAX_STR_LEN]) {
+    // Copiar el contenido del origen al destino
+    for (int i = 0; i < MAX_ARR_LEN; ++i) {
+        std::strcpy(destino[i], origen[i]);
+    }
+    
+    // Añadir el elemento put al final del destino
+    std::strcpy(destino[MAX_ARR_LEN - 1], put);
+}
+
+
 %}
+
 %union{
-	int   c_entero;
-	float c_real;
-	char  c_cadena[20];
-	char*  c_string;
+    int   c_entero;
+    float c_real;
+    char  c_cadena[MAX_STR_LEN];
+    char*  c_string; // Cambiado de char* a string
       bool  c_bool;
       struct {
             float valor;
             bool esReal;
       } c_expresion;
+    int c_type;
+    int c_color;
+    int c_forma;
+    char seqIdentificadores[MAX_ARR_LEN][MAX_STR_LEN];
 }
 
-%start entrada
+%start inicio
 %token <c_entero> NUMERO
 %token <c_real> REAL  
 %token <c_cadena> ID NOMBRE
@@ -77,11 +152,13 @@ void setError(const char *msg){
 %token <c_bool> CIERTO FALSO
 %token ASIGNATION SALIR NO EQ MENEQ MAYEQ DISTINCT AND OR INTDIV
 %token VARIABLES MUEBLES HABITACION FINHABITACION 
-%token RECTANGULO CIRCULO NEGRO GRIS ROJO AZUL AMARILLO VERDE MARRON
-%token decENTERO decREAL decBOOL 
+%token <c_type> TIPO 
+%token <c_color> COLOR
+%token <c_forma> FORMA 
 %token SITUAR PAUSA MENSAJE
 %type <c_expresion> expr
 %type <c_bool> exBool 
+%nterm <std::vector<std::string>> seqIdentificadores;
 
 %left OR
 %left AND
@@ -93,17 +170,52 @@ void setError(const char *msg){
 %right NO
 
 %%
-entrada: 		
-      |entrada linea
+inicio:           blVariables  blMuebles  
       ;
-      
-linea: asignacion 
-	|error	'\n'			{yyerrok;}   
-	;
+
+      blVariables:      
+                  |     VARIABLES   listaDeclaraciones  
+                  |     listaDeclaraciones  
+                  ;
+
+            listaDeclaraciones:
+                              |     listaDeclaraciones declaracion
+                              |     declaracion  
+                              ;      
+
+
+                  declaracion:      TIPO seqIdentificadores '\n' {}
+                              |     asignacion 
+                              |     error	'\n'			{yyerrok;}   
+                              ;      
+                  
+                        seqIdentificadores: ID { }
+                                          | seqIdentificadores ',' ID {  }
+                                          ;
+
+      blMuebles:      MUEBLES   listaMuebles  
+                  ;
+
+            listaMuebles:
+                              |     listaMuebles defMueble
+                              |     defMueble  
+                              ;      
+
+                  defMueble:        NOMBRE '=''<'FORMA','expr','expr','COLOR'>''\n' {}
+                              |     NOMBRE '=''<'FORMA','expr','COLOR'>''\n' {}
+                              |     error	'\n'			{yyerrok;}   
+                              ;      
+
 
 asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
-                                                if(!variables.putVar($1, $3)){
-                                                      setError("La variable no es de este tipo");
+                                                errorType=variables.putVar($1, $3);
+                                                if(errorType==-2){
+                                                      sprintf(msgMid, "La variable %s es de tipo Booleano y no se le puede asignar este valor", $1);
+                                                      setError(msgMid);
+                                                }
+                                                if(errorType==-1){
+                                                      sprintf(msgMid, "La variable %s no está declarada", $1);
+                                                      setError(msgMid);
                                                 }
                                                 semanticError();
                                                 }
@@ -114,20 +226,60 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
 
             | ID ASIGNATION expr '\n'     {if(!semanticError()){
                                                 if(!$3.esReal){
-                                                      if(!variables.putVar($1, (int)$3.valor)){
+                                                      errorType=variables.putVar($1, (int)$3.valor);
+                                                      if(errorType==-2){
                                                             sprintf(msgMid, "La variable %s es de tipo real y no se le puede asignar un valor entero", $1);
                                                             setError(msgMid);
 
                                                       }
                                                 } else{
-                                                      if(!variables.putVar($1, $3.valor)){
+                                                      errorType=variables.putVar($1, $3.valor);
+                                                      if(errorType==-2){
                                                             sprintf(msgMid, "La variable %s es de tipo entero y no se le puede asignar un valor real", $1);
                                                             setError(msgMid);
                                                       }
                                                 }
+                                                if(errorType==-1){
+                                                      sprintf(msgMid, "La variable %s no está declarada", $1);
+                                                      setError(msgMid);
+                                                }
                                                 semanticError();
                                            } 
                                           }
+            | TIPO ID ASIGNATION expr '\n'     {if(!semanticError()){
+                                                if(!$4.esReal){
+                                                      errorType=variables.decVar(toType($1),$2, (int)$4.valor);
+                                                      if(errorType==-2){
+                                                            sprintf(msgMid, "A la variable %s no se le puede asignar un entero", $2);
+                                                            setError(msgMid);
+                                                      }
+                                                } else{
+                                                      errorType=variables.decVar(toType($1),$2, $4.valor);
+                                                      if(errorType==-2){
+                                                            sprintf(msgMid, "A la variable %s no se le puede asignar un real", $2);
+                                                            setError(msgMid);
+                                                      }
+                                                }
+                                                if(errorType==-1){
+                                                      sprintf(msgMid, "Ya existe una variable con con el nombre %s", $2);
+                                                      setError(msgMid);
+                                                }
+                                                semanticError();
+                                           } 
+                                          }
+            | TIPO ID ASIGNATION exBool '\n'     {if(!semanticError()){
+                                                      errorType=variables.decVar(toType($1),$2, $4);
+                                                      if(errorType==-2){
+                                                            sprintf(msgMid, "A la variable %s no se le puede asignar un tipo Booleano", $2);
+                                                            setError(msgMid);
+                                                      }
+                                                      if(errorType==-1){
+                                                            sprintf(msgMid, "La variable %s no está declarada", $2);
+                                                            setError(msgMid);
+                                                      }
+                                                      semanticError();
+                                                      }
+                                                }
             ;
 
 
