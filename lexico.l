@@ -8,7 +8,7 @@
 #include "tablaValores.h"
 #include "tablaMuebles.h"
 int n_lineas;
-int debug = 1; // Variable debug para controlar la impresión de mensajes de depuración
+int debug = 0; // Variable debug para controlar la impresión de mensajes de depuración
 %}
 
 %option noyywrap
@@ -36,19 +36,19 @@ int debug = 1; // Variable debug para controlar la impresión de mensajes de dep
 
 
 
-[Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("FORMAr "); return FORMA; yylval.c_forma=0;   
-[Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("FORMAc "); return FORMA; yylval.c_forma=1;
-"negro"                                                 if(debug) printf("COLORn "); return COLOR; yylval.c_color=0;
-"gris"                                                  if(debug) printf("COLORg "); return COLOR; yylval.c_color=1;
-"rojo"                                                  if(debug) printf("COLORr "); return COLOR; yylval.c_color=2;
-"azul"                                                  if(debug) printf("COLORaz "); return COLOR; yylval.c_color=3;
-"amarillo"                                              if(debug) printf("COLORam "); return COLOR; yylval.c_color=4;
-"verde"                                                 if(debug) printf("COLORv "); return COLOR; yylval.c_color=5;
-"marron"                                                if(debug) printf("COLORm "); return COLOR; yylval.c_color=6;
+[Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("FORMAr "); yylval.c_forma=0; return FORMA; 
+[Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("FORMAc "); yylval.c_forma=1; return FORMA;
+"negro"                                                 if(debug) printf("COLORn "); yylval.c_color=0; return COLOR;
+"gris"                                                  if(debug) printf("COLORg "); yylval.c_color=1; return COLOR;
+"rojo"                                                  if(debug) printf("COLORr "); yylval.c_color=2; return COLOR;
+"azul"                                                  if(debug) printf("COLORaz "); yylval.c_color=3; return COLOR;
+"amarillo"                                              if(debug) printf("COLORam "); yylval.c_color=4; return COLOR;
+"verde"                                                 if(debug) printf("COLORv "); yylval.c_color=5; return COLOR;
+"marron"                                                if(debug) printf("COLORm "); yylval.c_color=6; return COLOR;
 
-[Ee][Nn][Tt][Ee][Rr][Oo]                                if(debug) printf("TIPOi "); return TIPO; yylval.c_type=0;
-[Rr][Ee][Aa][Ll]                                        if(debug) printf("TIPOr "); return TIPO; yylval.c_type=1;
-[Bb][Oo][Oo][Ll]                                        if(debug) printf("TIPOb "); return TIPO; yylval.c_type=2;
+[Ee][Nn][Tt][Ee][Rr][Oo]                                if(debug) printf("TIPOi "); yylval.c_type=0; return TIPO; 
+[Rr][Ee][Aa][Ll]                                        if(debug) printf("TIPOr "); yylval.c_type=1; return TIPO; 
+[Bb][Oo][Oo][Ll]                                        if(debug) printf("TIPOb "); yylval.c_type=2; return TIPO; 
 
 [Ss][Ii][Tt][Uu][Aa][Rr]                                if(debug) printf("SITUAR "); return SITUAR;
 [Pp][Aa][Uu][Ss][Aa]                                    if(debug) printf("PAUSA "); return PAUSA;

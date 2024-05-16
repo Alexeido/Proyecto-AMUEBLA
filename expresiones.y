@@ -14,14 +14,14 @@ extern int n_lineas;
 extern int debug;
 extern int yylex();
 bool errorSemantico=false;
-const int MAX_STR_LEN = 20;
-const int MAX_ARR_LEN = 50;
 
 char msgMid[400];
 int errorType;
 char msgError[400];
 vars variables;
 vars variablesBackUp;
+vector<string> auxiliar;
+TipoVariable tipoActual=TERROR;
 ValorVariable actual;
 extern FILE* yyin;
 extern FILE* yyout;
@@ -29,8 +29,9 @@ extern FILE* yyout;
 void yyerror(const char* s){         /*    llamada por cada error sintactico de yacc */
 	
       if(true)
-        cout << "Error sintáctico en la instrucción "<< n_lineas+1<<endl;	
-      errorSemantico=false;
+        cout << "Error sintáctico en la instrucción "<< n_lineas+1<<endl;
+      errorSemantico=false;	
+      auxiliar.clear();
 } 
 
 
@@ -115,15 +116,6 @@ formaMueble toForma(int forma){
     }
 }
 
-void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_ARR_LEN][MAX_STR_LEN], const char put[MAX_STR_LEN]) {
-    // Copiar el contenido del origen al destino
-    for (int i = 0; i < MAX_ARR_LEN; ++i) {
-        std::strcpy(destino[i], origen[i]);
-    }
-    
-    // Añadir el elemento put al final del destino
-    std::strcpy(destino[MAX_ARR_LEN - 1], put);
-}
 
 
 %}
@@ -141,7 +133,6 @@ void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_A
     int c_type;
     int c_color;
     int c_forma;
-    char seqIdentificadores[50][20];
 }
 
 %start inicio
@@ -178,7 +169,7 @@ inicio: salto blVariables  blMuebles
       ;
 
       blVariables:      
-                  |     VARIABLES 	salto	listaDeclaraciones  {cout<<"VariaAAbles"<<endl;}
+                  |     VARIABLES 	salto	listaDeclaraciones  {cout<<"VariaAAbles"<<endl; variables.printVar();}
                   ;
 
             listaDeclaraciones:
@@ -188,12 +179,25 @@ inicio: salto blVariables  blMuebles
 
 
 
-                  declaracion:      TIPO seqIdentificadores salto {}
-                              |     asignacion salto
-                              ;      
+                  declaracion:      TIPO seqIdentificadores salto { 
+                        for(int i=0; i<auxiliar.size(); i++){
+                              char *name = new char[auxiliar[i].length() + 1];
+                              std::strcpy(name, auxiliar[i].c_str());
+                              if(!variables.decVar(toType($1), name)){
+                                    sprintf(msgMid, "Ya existe una variable con con el nombre %s", name);
+                                    setError(msgMid);
+                              }
+                              delete[] name;
+                              semanticError();
+                        }
+                        auxiliar.clear();
+                  }
+                  |     asignacion salto
+                  |     declarar   salto		
+                  ;      
                   
-                        seqIdentificadores: ID {cout<<$1<<", "; }
-                                          | seqIdentificadores ',' ID {cout<<$3<<", ";   }
+                        seqIdentificadores: ID {auxiliar.push_back($1);}
+                                          | seqIdentificadores ',' ID {auxiliar.push_back($3);}
                                           ;
 
       blMuebles:      MUEBLES   salto listaMuebles  
@@ -250,8 +254,9 @@ asignacion:   ID ASIGNATION exBool   {if(!semanticError()){
                                                 semanticError();
                                            } 
                                           }
-            | TIPO ID ASIGNATION expr      {if(!semanticError()){
-                                                      cout<<"asignacion de tipo normal"<<endl;
+      ;
+
+declarar:   TIPO ID ASIGNATION expr      {if(!semanticError()){
                                                 if(!$4.esReal){
                                                       errorType=variables.decVar(toType($1),$2, (int)$4.valor);
                                                       if(errorType==-2){

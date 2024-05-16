@@ -194,16 +194,16 @@ void vars::printVar() {
     for (int i = 0; i < total; i++) {
         switch(valores[i].tipo){
             case TENTERO:
-                cout << valores[i].nombre << "\tentero\t" << valores[i].dato.entero<< "\t";
+                cout << valores[i].nombre << "\tentero\t" << valores[i].dato.entero<< "\t"<<endl;
                 break;
             case TREAL:
-                cout << valores[i].nombre << "\treal\t" << valores[i].dato.real << "\t";
+                cout << valores[i].nombre << "\treal\t" << valores[i].dato.real << "\t"<<endl;
                 break;
             case TBOOL:
                 if (valores[i].dato.booleano) {
-                    cout << valores[i].nombre << "\tlógico\tcierto" << "\t";
+                    cout << valores[i].nombre << "\tlógico\tcierto" << "\t"<<endl;
                 } else {
-                    cout << valores[i].nombre << "\tlógico\tfalso" << "\t";
+                    cout << valores[i].nombre << "\tlógico\tfalso" << "\t"<<endl;
                 }
                 break;
             default:
