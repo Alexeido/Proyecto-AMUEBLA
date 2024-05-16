@@ -28,7 +28,7 @@ extern FILE* yyout;
 //definición de procedimientos auxiliares
 void yyerror(const char* s){         /*    llamada por cada error sintactico de yacc */
 	
-      if(debug!=1)
+      if(true)
         cout << "Error sintáctico en la instrucción "<< n_lineas+1<<endl;	
       errorSemantico=false;
 } 
@@ -158,7 +158,6 @@ void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_A
 %token SITUAR PAUSA MENSAJE
 %type <c_expresion> expr
 %type <c_bool> exBool 
-%nterm <std::vector<std::string>> seqIdentificadores;
 
 %left OR
 %left AND
@@ -170,47 +169,49 @@ void addToVector(char destino[MAX_ARR_LEN][MAX_STR_LEN], const char origen[MAX_A
 %right NO
 
 %%
-inicio:           
-      |blVariables  blMuebles  
+
+salto: '\n' 
+      | salto '\n'
+
+inicio: salto blVariables  blMuebles
+      | blVariables  blMuebles
       ;
 
       blVariables:      
-                  |     VARIABLES 	'\n'	  {cout<<"Variables"<<endl;}
-                  |     listaDeclaraciones  {cout<<"Lista declaraciones"<<endl;}
+                  |     VARIABLES 	salto	listaDeclaraciones  {cout<<"VariaAAbles"<<endl;}
                   ;
 
             listaDeclaraciones:
-                        |     declaracion  
-                        |     listaDeclaraciones declaracion
-                        |           error	'\n'			{yyerrok;}   
+                             declaracion 
+                        |     listaDeclaraciones declaracion 
                         ;           
 
 
 
-                  declaracion:      TIPO seqIdentificadores '\n' {}
-                              |     asignacion 
+                  declaracion:      TIPO seqIdentificadores salto {}
+                              |     asignacion salto
                               ;      
                   
                         seqIdentificadores: ID {cout<<$1<<", "; }
                                           | seqIdentificadores ',' ID {cout<<$3<<", ";   }
                                           ;
 
-      blMuebles:      MUEBLES   listaMuebles  
-                  ;
+      blMuebles:      MUEBLES   salto listaMuebles  
+            ;
 
             listaMuebles:
-                              |     listaMuebles defMueble
+                                   listaMuebles defMueble 
                               |     defMueble  
                               ;      
 
-                  defMueble:        NOMBRE '=''<'FORMA','expr','expr','COLOR'>''\n' {}
-                              |     NOMBRE '=''<'FORMA','expr','COLOR'>''\n' {}
-                              |     error	'\n'			{yyerrok;}   
+                  defMueble:        NOMBRE '=''<'FORMA','expr','expr','COLOR'>' salto {}
+                              |     NOMBRE '=''<'FORMA','expr','COLOR'>' salto {}
+                              |     error	salto		{yyerrok;}   
                               ;      
 
 
 
-asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
+asignacion:   ID ASIGNATION exBool   {if(!semanticError()){
                                                 errorType=variables.putVar($1, $3);
                                                 if(errorType==-2){
                                                       sprintf(msgMid, "La variable %s es de tipo Booleano y no se le puede asignar este valor", $1);
@@ -227,7 +228,7 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
  
 
 
-            | ID ASIGNATION expr '\n'     {if(!semanticError()){
+            | ID ASIGNATION expr    {if(!semanticError()){
                                                 if(!$3.esReal){
                                                       errorType=variables.putVar($1, (int)$3.valor);
                                                       if(errorType==-2){
@@ -249,7 +250,7 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
                                                 semanticError();
                                            } 
                                           }
-            | TIPO ID ASIGNATION expr '\n'     {if(!semanticError()){
+            | TIPO ID ASIGNATION expr      {if(!semanticError()){
                                                       cout<<"asignacion de tipo normal"<<endl;
                                                 if(!$4.esReal){
                                                       errorType=variables.decVar(toType($1),$2, (int)$4.valor);
@@ -271,7 +272,7 @@ asignacion:   ID ASIGNATION exBool '\n'   {if(!semanticError()){
                                                 semanticError();
                                            } 
                                           }
-            | TIPO ID ASIGNATION exBool '\n'     {if(!semanticError()){
+            | TIPO ID ASIGNATION exBool      {if(!semanticError()){
                                                       cout<<"asignacion de tipo booleano"<<endl;
                                                       errorType=variables.decVar(toType($1),$2, $4);
                                                       if(errorType==-2){
