@@ -96,6 +96,7 @@ int vars::putVar(char *name, int valor) {
             }
             else{
             valores[i].dato.entero = valor;
+            valores[i].inicializado = true;
             return 0;  //Si es entero actualizamos el valor del entero 
             }
         }
@@ -114,6 +115,7 @@ int vars::putVar(char *name, float valor) {
             }
             else{
             valores[i].dato.real = valor;
+            valores[i].inicializado = true;
             return 0;  //Si es real actualizamos el valor del real 
             }
         }
@@ -122,29 +124,46 @@ int vars::putVar(char *name, float valor) {
     return -1;
 }
 
+
 int vars::putVar(char *name, char *valor) {
-    for (int i = 0; i < total; i++) {
+    int enc=false;
+    int i=0;
+    while(!enc&&i<total){
         if (!strcmp(valores[i].nombre, name)) {
-            if(valores[i].tipo!=TCADENA)
+            if(valores[i].tipo!=TCADENA){
                 return -2;  //Si la variable existe pero no es una cadena no se cambia el valor del mismo
+            }
+            else{
             strcpy(valores[i].dato.cadena, valor);
+            valores[i].inicializado = true;
             return 0;  //Si es cadena actualizamos el valor de la cadena 
+            }
         }
+        i++;
     }
     return -1;
 }
 
+
 int vars::putVar(char *name, bool valor) {
-    for (int i = 0; i < total; i++) {
+    int enc=false;
+    int i=0;
+    while(!enc&&i<total){
         if (!strcmp(valores[i].nombre, name)) {
-            if(valores[i].tipo!=TBOOL)
-                return -2;  //Si la variable existe pero no es una cadena no se cambia el valor del mismo
+            if(valores[i].tipo!=TBOOL){
+                return -2;  //Si la variable existe pero no es un bool no se cambia el valor del mismo
+            }
+            else{
             valores[i].dato.booleano= valor;
-            return 0;  //Si es cadena actualizamos el valor de la cadena 
+            valores[i].inicializado = true;
+            return 0;  //Si es bool actualizamos el valor del bool 
+            }
         }
+        i++;
     }
     return -1;
 }
+
 ValorVariable vars::getVar(char *name){
     ValorVariable vacio;
     vacio.tipo=TERROR;
@@ -156,6 +175,7 @@ ValorVariable vars::getVar(char *name){
             vacio.tipo=valores[i].tipo;
             strcpy(vacio.nombre,valores[i].nombre);
             vacio.dato=valores[i].dato;
+            vacio.inicializado=valores[i].inicializado;
             enc=true;
         }
         i++;
@@ -165,20 +185,20 @@ ValorVariable vars::getVar(char *name){
 
 
 void vars::printVar(FILE* yyout) {
-    fprintf(yyout,"Tabla de símbolos:\n");
+    fprintf(yyout, "\033[35mTabla de valores:\033[0m\n");
     for (int i = 0; i < total; i++) {
         switch(valores[i].tipo){
             case TENTERO:
-                fprintf(yyout,"%s\tentero\t%d\n", valores[i].nombre , valores[i].dato.entero);
+                fprintf(yyout,"\033[32m%s\033[0m\tentero\t%d\n", valores[i].nombre , valores[i].dato.entero);
                 break;
             case TREAL:
-                fprintf(yyout,"%s\treal\t%f\n", valores[i].nombre , valores[i].dato.real);
+                fprintf(yyout,"\033[32m%s\033[0m\treal\t%f\n", valores[i].nombre , valores[i].dato.real);
                 break;
             case TBOOL:
                 if (valores[i].dato.booleano) {
-                    fprintf(yyout, "%s\tlógico\tcierto\n", valores[i].nombre);
+                    fprintf(yyout, "\033[32m%s\033[0m\tlógico\tcierto\n", valores[i].nombre);
                 } else {
-                    fprintf(yyout, "%s\tlógico\tfalso\n", valores[i].nombre);
+                    fprintf(yyout, "\033[32m%s\033[0m\tlógico\tfalso\n", valores[i].nombre);
                 }
                 break;
             default:
@@ -190,27 +210,7 @@ void vars::printVar(FILE* yyout) {
 
 
 void vars::printVar() {
-    cout << "Tabla de símbolos:\t "<<total<<endl;
-    for (int i = 0; i < total; i++) {
-        switch(valores[i].tipo){
-            case TENTERO:
-                cout << valores[i].nombre << "\tentero\t" << valores[i].dato.entero<< "\t"<<endl;
-                break;
-            case TREAL:
-                cout << valores[i].nombre << "\treal\t" << valores[i].dato.real << "\t"<<endl;
-                break;
-            case TBOOL:
-                if (valores[i].dato.booleano) {
-                    cout << valores[i].nombre << "\tlógico\tcierto" << "\t"<<endl;
-                } else {
-                    cout << valores[i].nombre << "\tlógico\tfalso" << "\t"<<endl;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    cout << endl;
+    printVar(stdout);
 }
 
 

@@ -38,6 +38,7 @@ int debug = 0; // Variable debug para controlar la impresión de mensajes de dep
 
 [Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("FORMAr "); yylval.c_forma=0; return FORMA; 
 [Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("FORMAc "); yylval.c_forma=1; return FORMA;
+
 "negro"                                                 if(debug) printf("COLORn "); yylval.c_color=0; return COLOR;
 "gris"                                                  if(debug) printf("COLORg "); yylval.c_color=1; return COLOR;
 "rojo"                                                  if(debug) printf("COLORr "); yylval.c_color=2; return COLOR;
@@ -58,13 +59,14 @@ int debug = 0; // Variable debug para controlar la impresión de mensajes de dep
 [Ff][Aa][Ll][Ss][Oo]            { yylval.c_bool = false; if(debug) printf("FALSO "); return FALSO; }
 [0-9]+                          yylval.c_entero = atoi(yytext); if(debug) printf("INT "); return NUMERO;
 
+\"[^\"]*\"          { strcpy(yylval.c_cadena, yytext); return CADENA; }
 [A-ZÁÉÍÓÚüÜ][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("NOMBRE "); return NOMBRE;
 [a-záéíóú][A-Za-z0-9_áéíóúÁÉÍÓÚüÜ]* strcpy(yylval.c_cadena, yytext); if(debug) printf("ID "); return ID;
 
 [0-9]*"."[0-9]+                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 [0-9]+"."[0-9]*                 yylval.c_real = atof(yytext); if(debug) printf("FLOAT "); return REAL;
 ([0-9]*[.][0-9]|[0-9][.][0-9]+)[eE][+-]?[0-9]+ yylval.c_real = atof(yytext); if(debug) printf("FFLOAT "); return REAL;
-"\"[^\"\n]*\"" { yylval.c_string = strdup(yytext); if(debug) printf("CADENA "); return CADENA; }
+
 
 
 \n                              n_lineas++; if (debug) printf("\n"); return (yytext[0]); // Nueva línea

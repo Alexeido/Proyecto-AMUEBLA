@@ -8,10 +8,13 @@ mueblesVars::mueblesVars() {
     }
 }
 
-bool mueblesVars::putMueble(char *name, formaMueble forma, colorMueble color, float ancho, float alto) {
+bool mueblesVars::putMueble(char *name, formaMueble forma, float ancho, float alto, colorMueble color) {
     bool enc=false;
     bool inserted=false;
     int i=0;
+    if(forma==FCIRCULO){
+        return false;
+    }
     while(!enc&&i<total){
         if (!strcmp(muebles[i].nombre, name)) {
             enc=true;  
@@ -30,10 +33,13 @@ bool mueblesVars::putMueble(char *name, formaMueble forma, colorMueble color, fl
     return inserted;
 }
 
-bool mueblesVars::putMueble(char *name, formaMueble forma, colorMueble color, float radio) {
+bool mueblesVars::putMueble(char *name, formaMueble forma, float radio, colorMueble color) {
     bool enc=false;
     bool inserted=false;
     int i=0;
+    if(forma==FRECTANGULO){
+        return false;
+    }
     while(!enc&&i<total){
         if (!strcmp(muebles[i].nombre, name)) {
             enc=true;  
@@ -57,13 +63,37 @@ mueble mueblesVars::getMueble(char *name) {
             return muebles[i];
         }
     }
+    mueble error;
+    error.forma = FERROR;
     // Return a default mueble if not found
     return mueble();
 }
 
 void mueblesVars::printMuebles(FILE* yyout) {
+    fprintf(yyout, "\033[35mTabla de muebles:\033[0m\n");
     for (int i = 0; i < total; i++) {
-        fprintf(yyout, "Mueble: %s\n", muebles[i].nombre);
+        switch (muebles[i].forma)
+        {
+        case FRECTANGULO:
+            if (strlen(muebles[i].nombre) >= 7) { //Cuando el nombre mide mas de 7 caracteres un doble tabulado es demasiado y descoloca la salida
+                fprintf(yyout, "\033[32m%s:\033[0m\trectángulo\t%f\t%f\n", muebles[i].nombre, muebles[i].medida.rect.ancho, muebles[i].medida.rect.alto);
+            }
+            else{
+                fprintf(yyout, "\033[32m%s:\033[0m\t\trectángulo\t%f\t%f\n", muebles[i].nombre, muebles[i].medida.rect.ancho, muebles[i].medida.rect.alto);
+            }
+            break;
+        case FCIRCULO:
+            if (strlen(muebles[i].nombre) >= 7) { //Cuando el nombre mide mas de 7 caracteres un doble tabulado es demasiado y descoloca la salida
+                fprintf(yyout, "\033[32m%s:\033[0m\tcírculo\t\t%f\n", muebles[i].nombre, muebles[i].medida.radio);
+            }
+            else{
+                fprintf(yyout, "\033[32m%s:\033[0m\t\tcírculo\t\t%f\n", muebles[i].nombre, muebles[i].medida.radio);
+            }
+            break;
+        
+        default:
+            break;
+        }
         // Add more print statements for other mueble properties
     }
 }

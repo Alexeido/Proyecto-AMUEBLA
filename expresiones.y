@@ -19,9 +19,9 @@ char msgMid[400];
 int errorType;
 char msgError[400];
 vars variables;
+mueblesVars muebles;
 vars variablesBackUp;
 vector<string> auxiliar;
-TipoVariable tipoActual=TERROR;
 ValorVariable actual;
 extern FILE* yyin;
 extern FILE* yyout;
@@ -124,7 +124,6 @@ formaMueble toForma(int forma){
     int   c_entero;
     float c_real;
     char  c_cadena[20];
-    char*  c_string; // Cambiado de char* a string
       bool  c_bool;
       struct {
             float valor;
@@ -139,7 +138,7 @@ formaMueble toForma(int forma){
 %token <c_entero> NUMERO
 %token <c_real> REAL  
 %token <c_cadena> ID NOMBRE
-%token <c_string> CADENA
+%token <c_cadena> CADENA
 %token <c_bool> CIERTO FALSO
 %token ASIGNATION SALIR NO EQ MENEQ MAYEQ DISTINCT AND OR INTDIV
 %token VARIABLES MUEBLES HABITACION FINHABITACION 
@@ -161,59 +160,86 @@ formaMueble toForma(int forma){
 
 %%
 
-salto: '\n' 
-      | salto '\n'
-
-inicio: salto blVariables  blMuebles
-      | blVariables  blMuebles
+inicio: salto blVariables  blMuebles listaHabitaciones
+      | blVariables  blMuebles listaHabitaciones
       ;
 
-      blVariables:      
-                  |     VARIABLES 	salto	listaDeclaraciones  {cout<<"VariaAAbles"<<endl; variables.printVar();}
+//BLOQUE INICIAL DE VARIABLES
+blVariables:      
+      |     VARIABLES 	salto	listaDeclaraciones  {cout<<"VariaAAbles"<<endl;}
+      ;
+
+listaDeclaraciones:     declaracion 
+                  |     listaDeclaraciones declaracion 
+                  ;           
+
+
+
+declaracion:      TIPO seqIdentificadores salto { 
+                  for(int i=0; i<auxiliar.size(); i++){
+                        char *name = new char[auxiliar[i].length() + 1];
+                        std::strcpy(name, auxiliar[i].c_str());
+                        if(!variables.decVar(toType($1), name)){
+                              sprintf(msgMid, "Ya existe una variable con con el nombre %s", name);
+                              setError(msgMid);
+                        }
+                        delete[] name; //Liberamos la memoria del puntero name
+                        semanticError();
+                  }
+                  auxiliar.clear();
+            }
+            |     asignacion salto
+            |     declarar   salto		
+            ;      
+
+seqIdentificadores: ID {auxiliar.push_back($1);}
+                  | seqIdentificadores ',' ID {auxiliar.push_back($3);}
                   ;
 
-            listaDeclaraciones:
-                             declaracion 
-                        |     listaDeclaraciones declaracion 
-                        ;           
+//BLOQUE DE MUEBLES
+blMuebles:      MUEBLES   salto listaMuebles  {muebles.printMuebles(); variables.printVar();}
+      ;
+
+listaMuebles:     listaMuebles defMueble 
+            |     defMueble  
+            ;      
+                  //$1=forma, $4=FORMA, $6=expr, $8=expr, $10=COLOR
+defMueble:        NOMBRE '=''<'FORMA','expr','expr','COLOR'>' salto {if(!muebles.putMueble($1, toForma($4), $6.valor, $8.valor, toColor($10))){
+                                                                  sprintf(msgMid, "Ya existe un mueble con el nombre %s", $1);
+                                                                  setError(msgMid);
+                                                                  semanticError();
+                                                                  }}
+            |     NOMBRE '=''<'FORMA','expr','COLOR'>' salto {if(!muebles.putMueble($1, toForma($4), $6.valor, toColor($8))){
+                                                                  sprintf(msgMid, "Ya existe un mueble con el nombre %s", $1);
+                                                                  setError(msgMid);
+                                                                  semanticError();
+                                                            }}
+            |     error	salto		{yyerrok;}   
+            ;      
 
 
+//BLOQUE DE HABITACIONES
 
-                  declaracion:      TIPO seqIdentificadores salto { 
-                        for(int i=0; i<auxiliar.size(); i++){
-                              char *name = new char[auxiliar[i].length() + 1];
-                              std::strcpy(name, auxiliar[i].c_str());
-                              if(!variables.decVar(toType($1), name)){
-                                    sprintf(msgMid, "Ya existe una variable con con el nombre %s", name);
-                                    setError(msgMid);
-                              }
-                              delete[] name;
-                              semanticError();
-                        }
-                        auxiliar.clear();
-                  }
-                  |     asignacion salto
-                  |     declarar   salto		
+listaHabitaciones:      listaHabitaciones defHabitacion 
+                  |     defHabitacion  {cout<<"Habitacion"<<endl;}
                   ;      
-                  
-                        seqIdentificadores: ID {auxiliar.push_back($1);}
-                                          | seqIdentificadores ',' ID {auxiliar.push_back($3);}
-                                          ;
 
-      blMuebles:      MUEBLES   salto listaMuebles  
+defHabitacion:        HABITACION '(' NUMERO ',' NUMERO ')' CADENA ':' salto listaInstrucciones FINHABITACION salto 
+                  ;
+
+listaInstrucciones:     listaInstrucciones instruccion 
+                  |     instruccion  
+                  ;
+
+instruccion:      asignacion salto
+            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto
+            |     PAUSA '(' NUMERO ')' salto
+            |     PAUSA '(' REAL ')' salto
+            |     MENSAJE '(' CADENA ')' salto
+            |     error	salto		{yyerrok;}   
             ;
 
-            listaMuebles:
-                                   listaMuebles defMueble 
-                              |     defMueble  
-                              ;      
-
-                  defMueble:        NOMBRE '=''<'FORMA','expr','expr','COLOR'>' salto {}
-                              |     NOMBRE '=''<'FORMA','expr','COLOR'>' salto {}
-                              |     error	salto		{yyerrok;}   
-                              ;      
-
-
+//Elementos recurrentes
 
 asignacion:   ID ASIGNATION exBool   {if(!semanticError()){
                                                 errorType=variables.putVar($1, $3);
@@ -294,6 +320,11 @@ declarar:   TIPO ID ASIGNATION expr      {if(!semanticError()){
             ;
 
 
+salto: '\n' 
+      | salto '\n'
+
+
+
 exBool:  CIERTO               {$$=true;}
        | FALSO                {$$=false;}
        | NO exBool            {$$=!($2);}
@@ -311,12 +342,13 @@ exBool:  CIERTO               {$$=true;}
        ;
 
 expr:   ID                   {actual=variables.getVar($1);
-                              if (actual.tipo==TERROR){
+                              if (actual.tipo==TERROR||!actual.inicializado){
                                     sprintf(msgMid, "La variable %s no está definida", actual.nombre);
+                                    cout<<n_lineas<<endl;
+                                    variables.printVar();
                                     setError(msgMid);
                                     //variables.printVar();
-                              }
-                              
+                              }                                                          
                               else if(actual.tipo==TENTERO){
                                     $$.esReal=false;
                                     $$.valor=actual.dato.entero;

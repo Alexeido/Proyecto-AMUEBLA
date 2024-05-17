@@ -1,0 +1,103 @@
+%% Fichero de ejemplo de la versión básica sin errores
+%% No incluye la estructura de control Si 
+
+VARIABLES
+
+Entero xx, yy, zz
+
+Real cc <- 200.0
+Entero amarilloTerraza<-1
+xx <- 350
+ yy <- 100
+
+MUEBLES
+
+%% Los del salón
+
+Sofa = < rectangulo, cc, 600.0, azul>
+Mesa =<circulo, 150.5, marron>
+Sillon = <rectangulo, cc, cc, azul>  
+Mueble = < rectangulo, 200.0, 800.0, negro>
+
+%% Los del dormitorio
+
+Cama  =  <   rectangulo, 150, 200, verde >
+Mesilla = <circulo, 25, rojo>
+Armario =< rectangulo, 300, 40, gris>
+
+%% Baldosas de la terraza
+BAmarilla = <rectangulo, 100.0, 100.0, amarillo > %% Baldosa amarilla
+BAmarilla = <rectangulo, 100.0, 100.0, rojo > %% Baldosa amarilla
+BGris = <circulo, 47.5, gris> %% Baldosa gris
+
+
+%% Comienza la definición de la habitaciones
+
+HABITACION (1000, 1000) "Salón" :
+	mensaje ("Se sitúa el sofá")
+	situar (Sofa, 0, 200)
+	mensaje ("Se sitúa la mesa central")
+	situar ( Mesa, 450, 500)
+	pausa (1.2) %% Pausa de un segundo
+	mensaje ("Se sitúan los dos sillones")
+	situar( Sillon, xx, yy)
+	situar( Sillon, xx, yy+600)
+	mensaje("Se sitúa un mueble")
+	situar(Mueble, 900, 100)
+FINHABITACION
+
+HABITACION (300, 300) "Dormitorio" :
+situar(Cama,75,0)
+zz <- 50
+situar ( Mesilla, zz, 25)
+situar (Mesilla, zz * 5, 25)
+si (xx<>yy) {
+	situar(Armario, 900, zz+zz)
+	mensaje("Se sitúa el armario")
+}
+pausa(2.2)
+FINHABITACION
+
+HABITACION (400, 600) "Terraza" :
+si (amarilloTerraza==1) {
+	situar(BAmarilla, 0, 0)
+	situar(BAmarilla, 0, 200)
+	situar(BAmarilla, 100, 100)
+	situar(BAmarilla, 100, 300)
+	situar(BAmarilla, 200, 0)
+	situar(BAmarilla, 200, 200)
+	situar(BAmarilla, 300, 100)
+	situar(BAmarilla, 300, 300)
+	situar(BAmarilla, 400, 0)
+	situar(BAmarilla, 400, 200)
+	situar(BAmarilla, 500, 100)
+	situar(BAmarilla, 500, 300)
+}
+si_no {
+	situar(BRojo, 0, 0)
+	situar(BRojo, 0, 200)
+	situar(BRojo, 100, 100)
+	situar(BRojo, 100, 300)
+	situar(BRojo, 200, 0)
+	situar(BRojo, 200, 200)
+	situar(BRojo, 300, 100)
+	situar(BRojo, 300, 300)
+	situar(BRojo, 400, 0)
+	situar(BRojo, 400, 200)
+	situar(BRojo, 500, 100)
+	situar(BRojo, 500, 300)
+
+}
+zz<-50
+repetir 3 {
+	situar(BGris, zz, 150)
+	situar(BGris, zz, 350)
+	zz<-zz+100
+	situar(BGris, zz, 50)
+	situar(BGris, zz, 250)
+	zz<-zz+100
+}
+FINHABITACION
+
+%% Y con esto acaba el programa
+

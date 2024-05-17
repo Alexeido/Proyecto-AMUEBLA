@@ -36,8 +36,24 @@ public:
     vars(); // Constructor
 
     
+
+    /**
+     * @brief Declara una variable en la tabla de valores.
+     * 
+     * @param type El tipo de la variable a insertar.
+     * @param name El nombre de la variable a insertar.
+     * @return  El resultado de la operación, true EXITO, false = ERROR YA DECLARADA.
+     */
     bool decVar(TipoVariable type, char *name);
 
+    /**
+     * @brief Declara una variable en la tabla de valores.
+     * 
+     * @param type El tipo de la variable a insertar.
+     * @param name El nombre de la variable a insertar.
+     * @param valor El valor de la variable a insertar.
+     * @return int El resultado de la operación, 0= EXITO, -1= ERROR YA DECLARADA, -2= ERROR TIPO DISTINTO.
+     */
     int decVar(TipoVariable type, char *name, int valor);
     int decVar(TipoVariable type, char *name, float valor);
     int decVar(TipoVariable type, char *name, char *valor);
@@ -60,7 +76,7 @@ public:
      * @brief Obtiene el valor de una variable de la tabla de valores.
      * 
      * @param name El nombre de la variable a obtener.
-     * @return ValorVariable La variable obtenida.
+     * @return ValorVariable La variable obtenida, si no existe el tipo de la variable obtenida será TERROR.
      */
     ValorVariable getVar(char *name);
 
