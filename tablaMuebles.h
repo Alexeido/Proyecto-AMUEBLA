@@ -12,7 +12,6 @@ enum formaMueble { FRECTANGULO, FCIRCULO, FERROR};
 enum colorMueble { CNEGRO, CGRIS, CROJO, CAZUL, CAMARILLO, CVERDE, CMARRON};
 
 
-
 struct rectSize {
     float ancho;
     float alto;

@@ -28,32 +28,32 @@ int debug = 0; // Variable debug para controlar la impresión de mensajes de dep
 "//"                             if(debug) printf("// "); return INTDIV;
 
 
-[Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]                    if(debug) printf("VARIABLES ");     return VARIABLES;
-[Mm][Uu][Ee][Bb][Ll][Ee][Ss]                            if(debug) printf("MUEBLES ");       return MUEBLES;
-[Hh][Aa][Bb][Ii][Tt][Aa][Cc][Ii][Oo][Nn]                if(debug) printf("HABITACION ");    return HABITACION;
-[Ff][Ii][Nn][Hh][Aa][Bb][Ii][Tt][Aa][Cc][Ii][Oo][Nn]    if(debug) printf("FINHABITACION "); return FINHABITACION;
+VARIABLES                                               if(debug) printf("VARIABLES ");     return VARIABLES;
+MUEBLES                                                 if(debug) printf("MUEBLES ");       return MUEBLES;
+HABITACION                                              if(debug) printf("HABITACION ");    return HABITACION;
+FINHABITACION                                           if(debug) printf("FINHABITACION "); return FINHABITACION;
 
 
 
 
-[Rr][Ee][Cc][Tt][Aa][Nn][Gg][Uu][Ll][Oo]                if(debug) printf("FORMAr "); yylval.c_forma=0; return FORMA; 
-[Cc][Ii][Rr][Cc][Uu][Ll][Oo]                            if(debug) printf("FORMAc "); yylval.c_forma=1; return FORMA;
+rectangulo                                              if(debug) printf("FORMAr "); yylval.c_forma=0; return FORMA; 
+circulo                                                 if(debug) printf("FORMAc "); yylval.c_forma=1; return FORMA;
 
-"negro"                                                 if(debug) printf("COLORn "); yylval.c_color=0; return COLOR;
-"gris"                                                  if(debug) printf("COLORg "); yylval.c_color=1; return COLOR;
-"rojo"                                                  if(debug) printf("COLORr "); yylval.c_color=2; return COLOR;
-"azul"                                                  if(debug) printf("COLORaz "); yylval.c_color=3; return COLOR;
-"amarillo"                                              if(debug) printf("COLORam "); yylval.c_color=4; return COLOR;
-"verde"                                                 if(debug) printf("COLORv "); yylval.c_color=5; return COLOR;
-"marron"                                                if(debug) printf("COLORm "); yylval.c_color=6; return COLOR;
+negro                                                   if(debug) printf("COLORn "); yylval.c_color=0; return COLOR;
+gris                                                    if(debug) printf("COLORg "); yylval.c_color=1; return COLOR;
+rojo                                                    if(debug) printf("COLORr "); yylval.c_color=2; return COLOR;
+azul                                                    if(debug) printf("COLORaz "); yylval.c_color=3; return COLOR;
+amarillo                                                if(debug) printf("COLORam "); yylval.c_color=4; return COLOR;
+verde                                                   if(debug) printf("COLORv "); yylval.c_color=5; return COLOR;
+marron                                                  if(debug) printf("COLORm "); yylval.c_color=6; return COLOR;
 
 [Ee][Nn][Tt][Ee][Rr][Oo]                                if(debug) printf("TIPOi "); yylval.c_type=0; return TIPO; 
 [Rr][Ee][Aa][Ll]                                        if(debug) printf("TIPOr "); yylval.c_type=1; return TIPO; 
 [Bb][Oo][Oo][Ll]                                        if(debug) printf("TIPOb "); yylval.c_type=2; return TIPO; 
 
-[Ss][Ii][Tt][Uu][Aa][Rr]                                if(debug) printf("SITUAR "); return SITUAR;
-[Pp][Aa][Uu][Ss][Aa]                                    if(debug) printf("PAUSA "); return PAUSA;
-[Mm][Ee][Nn][Ss][Aa][Jj][Ee]                            if(debug) printf("MENSAJE "); return MENSAJE;
+situar                                                  if(debug) printf("SITUAR "); return SITUAR;
+pausa                                                   if(debug) printf("PAUSA "); return PAUSA;
+mensaje                                                 if(debug) printf("MENSAJE "); return MENSAJE;
 
 [Cc][Ii][Ee][Rr][Tt][Oo]        { yylval.c_bool = true; if(debug) printf("CIERTO "); return CIERTO; }
 [Ff][Aa][Ll][Ss][Oo]            { yylval.c_bool = false; if(debug) printf("FALSO "); return FALSO; }

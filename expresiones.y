@@ -4,8 +4,10 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <sstream>
 #include "tablaValores.h"
 #include "tablaMuebles.h"
+#include "colaInstrucciones.h"
 
 using namespace std;
 
@@ -23,6 +25,8 @@ mueblesVars muebles;
 vars variablesBackUp;
 vector<string> auxiliar;
 ValorVariable actual;
+mueble mActual;
+ColaInstrucciones instrucciones;
 extern FILE* yyin;
 extern FILE* yyout;
 //definición de procedimientos auxiliares
@@ -103,6 +107,19 @@ colorMueble toColor(int color){
         return CNEGRO;
     }
 }
+string colorToString(colorMueble color) {
+    switch(color) {
+        case CNEGRO: return "NEGRO";
+        case CGRIS: return "GRIS";
+        case CROJO: return "ROJO";
+        case CAZUL: return "AZUL";
+        case CAMARILLO: return "AMARILLO";
+        case CVERDE: return "VERDE";
+        case CMARRON: return "MARRON";
+        default: return "Unknown";
+    }
+}
+
 
 formaMueble toForma(int forma){
     switch (forma)
@@ -116,14 +133,51 @@ formaMueble toForma(int forma){
     }
 }
 
+//Metodo para que el toString de los floats sea bonitos
 
+string floatToString(float value) {
+    ostringstream out;
+    out << value;
+    string result = out.str();
+
+    // Remover los ceros no significativos y el punto decimal si es necesario
+    if (result.find('.') != string::npos) {
+        // Eliminar ceros al final
+        result.erase(result.find_last_not_of('0') + 1);
+        // Si el último carácter es un punto, eliminarlo
+        if (result.back() == '.') {
+            result.pop_back();
+        }
+    }
+
+    return result;
+}
+void printHeader(FILE* yyout){
+                  fprintf(yyout,    "// Traducción del lenguaje AMUEBLA\n"
+                                    "#include \"amuebla.h\"\n"
+                                    "#include <allegro5/allegro5.h>\n"
+                                    "\n"
+                                    "using namespace std;\n"
+                                    "\n"
+                                    "int main(int argc, char *argv[]) {\n"
+                                    "\t// Se inicia el entorno gráfico\n"
+                                    "\tiniciarAmu();\n"
+                                    "\tpausaAmu(1.5);\n");
+}
+void printFooter(FILE* yyout){
+                  fprintf(yyout,    "\n\t// Se liberan los recursos del entorno gráfico\n"
+                                    "\tterminarAmu();\n"
+                                    "\treturn 0;\n"
+                                    "}"
+                                    );
+                              }
 
 %}
 
 %union{
     int   c_entero;
     float c_real;
-    char  c_cadena[20];
+    char  c_cadena[300];
       bool  c_bool;
       struct {
             float valor;
@@ -178,7 +232,7 @@ listaDeclaraciones:     declaracion
 declaracion:      TIPO seqIdentificadores salto { 
                   for(int i=0; i<auxiliar.size(); i++){
                         char *name = new char[auxiliar[i].length() + 1];
-                        std::strcpy(name, auxiliar[i].c_str());
+                        strcpy(name, auxiliar[i].c_str());
                         if(!variables.decVar(toType($1), name)){
                               sprintf(msgMid, "Ya existe una variable con con el nombre %s", name);
                               setError(msgMid);
@@ -197,7 +251,7 @@ seqIdentificadores: ID {auxiliar.push_back($1);}
                   ;
 
 //BLOQUE DE MUEBLES
-blMuebles:      MUEBLES   salto listaMuebles  {muebles.printMuebles(); variables.printVar();}
+blMuebles:      MUEBLES   salto listaMuebles  
       ;
 
 listaMuebles:     listaMuebles defMueble 
@@ -221,21 +275,49 @@ defMueble:        NOMBRE '=''<'FORMA','expr','expr','COLOR'>' salto {if(!muebles
 //BLOQUE DE HABITACIONES
 
 listaHabitaciones:      listaHabitaciones defHabitacion 
-                  |     defHabitacion  {cout<<"Habitacion"<<endl;}
+                  |     defHabitacion
                   ;      
 
-defHabitacion:        HABITACION '(' NUMERO ',' NUMERO ')' CADENA ':' salto listaInstrucciones FINHABITACION salto 
+defHabitacion:        HABITACION '(' expr ',' expr ')' CADENA ':' salto listaInstrucciones FINHABITACION salto {  semanticError();
+                                                                                                                  if(!$3.esReal&&!$5.esReal){
+                                                                                                                        fprintf(yyout,"\n\t// Nueva habitación\n"
+                                                                                                                        "\tnuevaHabitacionAmu(%s, %d, %d);\n", $7, (int)$3.valor, (int)$5.valor);
+                                                                                                                        instrucciones.addInstruccion("\t// Pausa final de habitación\n"
+                                                                                                                                                      "\tpausaAmu(1.5);");
+                                                                                                                        instrucciones.printCola(yyout);
+                                                                                                                        instrucciones.vaciarCola();
+                                                                                                                        }
+                                                                                                                        else{
+                                                                                                                        setError("Las dimensiones de la habitación deben ser enteras");
+                                                                                                                        instrucciones.vaciarCola();
+                                                                                                                        }
+                                                                                                                  }//Comprobar que expr son ints y pasarlos
                   ;
 
-listaInstrucciones:     listaInstrucciones instruccion 
-                  |     instruccion  
+listaInstrucciones:     listaInstrucciones instruccion {semanticError();}
+                  |     instruccion  {semanticError();}
                   ;
 
 instruccion:      asignacion salto
-            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto
-            |     PAUSA '(' NUMERO ')' salto
-            |     PAUSA '(' REAL ')' salto
-            |     MENSAJE '(' CADENA ')' salto
+            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto {mActual=muebles.getMueble($3);
+                                                                  if(mActual.forma==FERROR){
+                                                                        sprintf(msgMid, "El mueble %s no está definido", $3);
+                                                                        setError(msgMid);
+                                                                  }
+                                                                  else if($7.esReal||$5.esReal){
+                                                                        setError("Las coordenadas de situar deben ser enteras");
+                                                                  }
+                                                                  else{
+                                                                        if(mActual.forma==FRECTANGULO){
+                                                                              instrucciones.addInstruccion("\trectanguloAmu(" +to_string((int)$5.valor) + ", " + to_string((int)$7.valor) +", "+ floatToString(mActual.medida.rect.ancho) + ", " + floatToString(mActual.medida.rect.alto)+", "+ colorToString(mActual.color) +");");
+                                                                        }
+                                                                        else{
+                                                                              instrucciones.addInstruccion("\tcirculoAmu(" + to_string((int)$5.valor) + ", " + to_string((int)$7.valor) + ", " + floatToString(mActual.medida.radio) + ", " + colorToString(mActual.color) + ");");
+                                                                        }
+                                                                  }
+                                                                  }
+            |     PAUSA '(' expr ')' salto {instrucciones.addInstruccion("\tpausaAmu(" + floatToString($3.valor) + ");");}
+            |     MENSAJE '(' CADENA ')' salto {instrucciones.addInstruccion("\t// "+ string($3).erase(0,1));}
             |     error	salto		{yyerrok;}   
             ;
 
@@ -254,9 +336,6 @@ asignacion:   ID ASIGNATION exBool   {if(!semanticError()){
                                                 semanticError();
                                                 }
                                           }
-
- 
-
 
             | ID ASIGNATION expr    {if(!semanticError()){
                                                 if(!$3.esReal){
@@ -345,7 +424,7 @@ expr:   ID                   {actual=variables.getVar($1);
                               if (actual.tipo==TERROR||!actual.inicializado){
                                     sprintf(msgMid, "La variable %s no está definida", actual.nombre);
                                     cout<<n_lineas<<endl;
-                                    variables.printVar();
+                                    //variables.printVar();
                                     setError(msgMid);
                                     //variables.printVar();
                               }                                                          
@@ -437,18 +516,18 @@ int main(int argc, char* argv[]) {
         cout << "No se pudo abrir el archivo de entrada." << endl;
         return 1;
     }
-     
-     //yylex();
-     yyparse();
-
-    // Abre el archivo de salida
     yyout = fopen("salidaAmu.cpp", "w");
     if (!yyout) {
         cout << "No se pudo abrir el archivo de salida." << endl;
         fclose(yyin);
         return 1;
     }
-     variables.printVar(yyout);
+
+      printHeader(yyout);
+     
+      yyparse();
+      printFooter(yyout);
+    // Abre el archivo de salida
      //variables.printVar();
      return 0;
 }

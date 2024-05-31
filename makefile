@@ -4,7 +4,7 @@
 
 all: expresiones
 
-OBJ = expresiones.o lexico.o tablaValores.o tablaMuebles.o
+OBJ = expresiones.o lexico.o tablaValores.o tablaMuebles.o colaInstrucciones.o
 
 expresiones : $(OBJ)     				#segunda fase de la traducción. Generación del código ejecutable 
 	g++ -oexpresiones $(OBJ)
@@ -26,6 +26,9 @@ tablaMuebles.o : tablaMuebles.cpp                # Compilar tablaMuebles.cpp
 
 tablaValores.o : tablaValores.cpp                # Compilar tablaValores.cpp
 	g++ -c -Wno-deprecated -o tablaValores.o tablaValores.cpp
+
+colaInstrucciones.o : colaInstrucciones.cpp                # Compilar tablaValores.cpp
+	g++ -c -Wno-deprecated -o colaInstrucciones.o colaInstrucciones.cpp
 
 lex.yy.c: lexico.l						#obtenemos el analizador léxico en C
 	flex lexico.l
