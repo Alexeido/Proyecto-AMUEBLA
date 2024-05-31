@@ -21,11 +21,21 @@ void ColaInstrucciones::vaciarCola() {
 }
 
 void ColaInstrucciones::printCola(FILE* YYOUT) {
-    queue<string> colaCopia = cola;
 
-    while (!colaCopia.empty()) {
-        string instruccion = colaCopia.front();
-        colaCopia.pop();
+    while (!cola.empty()) {
+        string instruccion = cola.front();
+        cola.pop();
         fprintf(YYOUT, "%s\n", instruccion.c_str());
+    }
+}
+
+void ColaInstrucciones::printCola(FILE* YYOUT, int n) {
+    for(int i = 0; i < n; i++) {
+        queue<string> colaCopia = cola;
+        while (!colaCopia.empty()) {
+            string instruccion = colaCopia.front();
+            colaCopia.pop();
+            fprintf(YYOUT, "%s\n", instruccion.c_str());
+        }
     }
 }

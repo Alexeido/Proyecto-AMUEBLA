@@ -21,5 +21,6 @@ public:
     void vaciarCola();
 
     void printCola(FILE* YYOUT);
+    void printCola(FILE* YYOUT, int n);
 };
 #endif

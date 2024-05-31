@@ -54,6 +54,9 @@ marron                                                  if(debug) printf("COLORm
 situar                                                  if(debug) printf("SITUAR "); return SITUAR;
 pausa                                                   if(debug) printf("PAUSA "); return PAUSA;
 mensaje                                                 if(debug) printf("MENSAJE "); return MENSAJE;
+repetir                                                 if(debug) printf("REPETIR "); return REPETIR;
+si                                                      if(debug) printf("SI"); return SI;
+si_no                                                   if(debug) printf("SINO"); return SINO;
 
 [Cc][Ii][Ee][Rr][Tt][Oo]        { yylval.c_bool = true; if(debug) printf("CIERTO "); return CIERTO; }
 [Ff][Aa][Ll][Ss][Oo]            { yylval.c_bool = false; if(debug) printf("FALSO "); return FALSO; }
