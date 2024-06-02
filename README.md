@@ -1,49 +1,85 @@
-# AMUEBLA: Un lenguaje para amueblar habitaciones
+# Proyecto AMUEBLA
 
-Este proyecto es parte de la asignatura Teoría de Lenguajes y consiste en la construcción de un traductor para un lenguaje llamado AMUEBLA. El objetivo es crear un programa en C++ que, al compilarse y ejecutarse, muestre en pantalla una secuencia de habitaciones con muebles según la definición que aparezca en el fichero de entrada.
+El proyecto **AMUEBLA** es un traductor diseñado para un lenguaje específico que permite definir plantas de habitaciones utilizando recuadros y círculos para representar muebles. Este traductor toma un programa escrito en el lenguaje AMUEBLA (archivo con extensión `.amu`) y genera un archivo `salidaAmu.cpp` con el resultado traducido.
 
-## Descripción del proyecto
+## Ampliaciones del Proyecto
 
-El traductor para el lenguaje AMUEBLA se estructura en tres módulos principales: el analizador léxico, el analizador sintáctico y el gestor de la tabla de símbolos. El traductor tendrá un único parámetro que será el nombre del fichero de texto de entrada con extensión `.amu`, generando un archivo con extensión `.cpp`.
+El proyecto ha sido ampliado con las siguientes funcionalidades:
 
-El proyecto debe cumplir con los siguientes aspectos:
+- **Primera ampliación**: Se han incluido bucles sin anidación.
+- **Segunda ampliación**: Se han añadido estructuras de control (bucles y sentencia `si-sino`) anidadas.
 
-- Detectar errores gramaticales o semánticos y mostrar un mensaje indicando la línea en la que se ha cometido el error.
-- Entregar el proyecto con una breve documentación en PDF que preste especial atención al diseño de las estructuras de datos y funciones auxiliares utilizadas en la implementación, así como a cualquier otro aspecto relevante del proyecto.
-- En caso de conflictos gramaticales, estos deben explicarse y justificarse en la documentación.
-- Valoración en la evaluación del proyecto incluirá la claridad y corrección de la gramática, la eficiencia del código C/C++ y de las estructuras de datos definidas.
+Actualmente, el número de anidaciones permitido es 50, aunque se puede modificar cambiando la constante `NUMANIDADOS` en el archivo `expresiones.y`.
 
-## Ampliaciones del proyecto
+## Autores
 
-Se pueden realizar ampliaciones al proyecto para obtener una calificación más alta:
+El proyecto ha sido realizado por:
+- Alejandro Barrena Millán
+- Elena Barrera Rodrigo
 
-1. **Primera ampliación:** Incluir bucles sin anidación.
-2. **Segunda ampliación:** Incluir estructuras de control anidadas (bucles y sentencia si-sino).
-3. **Tercera ampliación:** Almacenamiento en una estructura de control auxiliar (se recomienda un árbol) de las expresiones aritméticas y lógicas para que puedan ser evaluadas varias veces.
+## Contenido
 
-El proyecto puede ser realizado de forma individual o en pareja.
+- [Clases Auxiliares](#clases-auxiliares)
+- [Funciones Auxiliares](#funciones-auxiliares)
 
-## Requisitos
+## Clases Auxiliares
 
-Para ejecutar la librería Amuebla, es necesario tener instalada la librería gráfica Allegro 5.
+Las clases auxiliares proporcionan estructuras y métodos que facilitan la gestión de variables, muebles e instrucciones en el lenguaje AMUEBLA.
 
-## Ejecución del programa
+### Clase `vars`
 
-Para ejecutar el programa, sigue estos pasos:
+La clase `vars` gestiona una tabla de valores de varios tipos (entero, real, booleano, cadena) asegurando su correcta inicialización y manejo de errores. Sus principales métodos incluyen:
 
-1. Asegúrate de tener instalada la librería gráfica Allegro 5 en tu sistema.
-2. Compila el traductor utilizando el `makefile`.
-3. Ejecuta el programa compilado.
-4. Proporciona como parámetro el nombre del fichero de texto de entrada con extensión `.amu` y traducirá este fichero a un archivo llamado `salidaAmu.cpp`.
+- **`decVar`**: Declara variables con o sin valor inicial.
+- **`putVar`**: Inserta o actualiza valores de variables existentes.
+- **`getVar`**: Obtiene el valor de una variable.
+- **`printVar`**: Imprime la tabla de valores en un archivo o en la consola.
+- **`copiarVar`**: Copia la tabla de valores de otra instancia de `vars`.
 
-Por ejemplo, si el fichero de entrada se llama `entrada.amu`, puedes ejecutar el programa de la siguiente manera:
+### Clase `mueblesVars`
 
-```bash
-./expresiones entrada.amu
-```
-Tras esto ejecuta el makeAmuebla con el siguiente comando
+La clase `mueblesVars` administra una tabla de muebles de distintas formas y colores. Sus principales métodos incluyen:
 
-```bash
-make -f makeAmuebla
-```
-El programa mostrará en pantalla una secuencia de habitaciones con muebles según la definición que se encuentre en el fichero de entrada.
+- **`putMueble`**: Agrega muebles con sus respectivos tamaños y colores.
+- **`getMueble`**: Obtiene un mueble por su nombre.
+- **`printMuebles`**: Imprime la tabla de muebles en un archivo o en la consola.
+- **`copiarMuebles`**: Copia la tabla de muebles de otra instancia de `mueblesVars`.
+
+### Clase `ColaInstrucciones`
+
+La clase `ColaInstrucciones` facilita la gestión de una cola de instrucciones, permitiendo su almacenamiento, impresión y manipulación. Sus principales métodos incluyen:
+
+- **`addInstruccion`**: Añade una instrucción a la cola.
+- **`vaciarCola`**: Vacía la cola de instrucciones.
+- **`anidarCola`**: Anida otra cola de instrucciones dentro de la cola actual.
+- **`printCola`**: Imprime la cola de instrucciones en un archivo, una vez o varias veces.
+
+## Funciones Auxiliares
+
+Estas funciones auxiliares se utilizan en el programa para tareas específicas, tales como comprobaciones de errores semánticos, conversiones de tipos y formateos.
+
+### Manejo de Errores Semánticos
+
+- **`semanticError()`**: Comprueba si hay un error semántico y muestra el mensaje correspondiente.
+- **`semanticError(const char *msg)`**: Establece y muestra un mensaje de error semántico.
+- **`setError(const char *msg)`**: Establece la bandera de error semántico y almacena el mensaje de error.
+
+### Conversiones de Tipos
+
+- **`toType(int tipo)`**: Convierte un entero en un tipo de variable (`TipoVariable`).
+- **`toColor(int color)`**: Convierte un entero en un tipo de color (`colorMueble`).
+- **`toForma(int forma)`**: Convierte un entero en un tipo de forma (`formaMueble`).
+
+### Conversión a Cadena
+
+- **`colorToString(colorMueble color)`**: Convierte un tipo de color en su representación en cadena.
+- **`floatToString(float value)`**: Convierte un valor flotante a su representación en cadena, eliminando ceros no significativos.
+
+### Impresión de Cabeceras y Pies de Página
+
+- **`printHeader(FILE* yyout)`**: Imprime la cabecera del archivo de salida.
+- **`printFooter(FILE* yyout)`**: Imprime el pie de página del archivo de salida.
+
+## Conclusiones
+
+Las clases y funciones auxiliares implementadas en el proyecto AMUEBLA proporcionan una estructura robusta y modular para la gestión de variables, muebles e instrucciones. Estas herramientas permiten una mayor flexibilidad y control en la traducción de programas escritos en el lenguaje AMUEBLA, facilitando su ampliación y mantenimiento.
