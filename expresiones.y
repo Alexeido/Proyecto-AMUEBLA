@@ -326,27 +326,30 @@ listaInstrucciones:     listaInstrucciones instruccion {semanticError();}
                   ;
 
 instruccion:      asignacion salto
-            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){mActual=muebles.getMueble($3);
-                                                                  if(mActual.forma==FERROR){
-                                                                        sprintf(msgMid, "El mueble %s no está definido", $3);
-                                                                        setError(msgMid);
-                                                                  }
-                                                                  else if($7.esReal||$5.esReal){
-                                                                        setError("Las coordenadas de situar deben ser enteras");
-                                                                  }
-                                                                  else{
-                                                                        if(mActual.forma==FRECTANGULO){
-                                                                              instrucciones[instruccionActual].addInstruccion("\trectanguloAmu(" +to_string((int)$5.valor) + ", " + to_string((int)$7.valor) +", "+ floatToString(mActual.medida.rect.ancho) + ", " + floatToString(mActual.medida.rect.alto)+", "+ colorToString(mActual.color) +");");
+            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){
+                                                                        mActual=muebles.getMueble($3);
+                                                                        if(mActual.forma==FERROR){
+                                                                              sprintf(msgMid, "El mueble %s no está definido", $3);
+                                                                              setError(msgMid);
+                                                                        }
+                                                                        else if($7.esReal||$5.esReal){
+                                                                              setError("Las coordenadas de situar deben ser enteras");
                                                                         }
                                                                         else{
-                                                                              instrucciones[instruccionActual].addInstruccion("\tcirculoAmu(" + to_string((int)$5.valor) + ", " + to_string((int)$7.valor) + ", " + floatToString(mActual.medida.radio) + ", " + colorToString(mActual.color) + ");");
+                                                                              if(mActual.forma==FRECTANGULO){
+                                                                                    instrucciones[instruccionActual].addInstruccion("\trectanguloAmu(" +to_string((int)$5.valor) + ", " + to_string((int)$7.valor) +", "+ floatToString(mActual.medida.rect.ancho) + ", " + floatToString(mActual.medida.rect.alto)+", "+ colorToString(mActual.color) +");");
+                                                                              }
+                                                                              else{
+                                                                                    instrucciones[instruccionActual].addInstruccion("\tcirculoAmu(" + to_string((int)$5.valor) + ", " + to_string((int)$7.valor) + ", " + floatToString(mActual.medida.radio) + ", " + colorToString(mActual.color) + ");");
+                                                                              }
                                                                         }
-                                                                  }
-                                                                  semanticError();
+                                                                        semanticError();
                                                                   }}
-            |     PAUSA '(' expr ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){instrucciones[instruccionActual].addInstruccion("\tpausaAmu(" + floatToString($3.valor) + ");");}}
-            |     MENSAJE '(' CADENA ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){instrucciones[instruccionActual].addInstruccion("\t// "+ string($3).erase(0,1));}}
-            |     
+            |     PAUSA '(' expr ')' salto            {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){
+                                                            instrucciones[instruccionActual].addInstruccion("\tpausaAmu(" + floatToString($3.valor) + ");");}}
+            |     MENSAJE '(' CADENA ')' salto        {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){
+                                                            instrucciones[instruccionActual].addInstruccion("\t// "+ string($3).erase(0,1));
+                                                      }}
             |     REPETIR expr {instruccionActual++; 
                                 if($2.esReal){
                                     setError("La instrucción repetir debe ir acompañada de un entero");
@@ -361,12 +364,21 @@ instruccion:      asignacion salto
                                                             instrucciones[instruccionActual].vaciarCola();
                                                             instruccionActual--;
                                                             }
-            |     SI '(' exBool ')' {ifActual++; if(ejecutarInstruccion[ifActual-1]){ejecutarInstruccion[ifActual]=$3;}else{ejecutarInstruccion[ifActual]=false;}} '{' salto listaInstrucciones '}' salto sino_opcional {ejecutarInstruccion[ifActual]=true; ifActual--;}
+            |     SI '(' exBool ')' {ifActual++; 
+                                    if(ejecutarInstruccion[ifActual-1]){
+                                          ejecutarInstruccion[ifActual]=$3;
+                                    }
+                                    else{
+                                          ejecutarInstruccion[ifActual]=false;
+                                    }}
+                  '{' salto listaInstrucciones '}' salto sino_opcional {ejecutarInstruccion[ifActual]=true; ifActual--;}
             |     error	salto		{yyerrok;}   
             ;
 
 sino_opcional:   
-            |    SINO {if(ejecutarInstruccion[ifActual-1]){ejecutarInstruccion[ifActual]=!ejecutarInstruccion[ifActual];}} '{' salto listaInstrucciones '}' salto
+            |    SINO { if(ejecutarInstruccion[ifActual-1]){
+                              ejecutarInstruccion[ifActual]=!ejecutarInstruccion[ifActual];
+                        }} '{' salto listaInstrucciones '}' salto
             ;
 
 //Elementos recurrentes
