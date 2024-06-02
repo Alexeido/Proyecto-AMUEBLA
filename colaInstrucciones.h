@@ -11,7 +11,7 @@ using namespace std;
 class ColaInstrucciones {
 private:
     queue<string> cola;
-    const int capacidadMaxima = 200;
+    const int capacidadMaxima = 2000;
 
 public:
     ColaInstrucciones();
@@ -19,7 +19,7 @@ public:
     void addInstruccion(const string& instruccion);
 
     void vaciarCola();
-
+    void anidarCola(ColaInstrucciones colaInstrucciones);
     void printCola(FILE* YYOUT);
     void printCola(FILE* YYOUT, int n);
 };

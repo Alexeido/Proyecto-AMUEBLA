@@ -15,6 +15,7 @@ using namespace std;
 extern int n_lineas;    			
 extern int debug;
 extern int yylex();
+const int NUMANIDADOS =50;
 bool errorSemantico=false;
 
 char msgMid[400];
@@ -26,12 +27,16 @@ vars variablesBackUp;
 vector<string> auxiliar;
 ValorVariable actual;
 mueble mActual;
-ColaInstrucciones instrucciones[2];
+ColaInstrucciones instrucciones[NUMANIDADOS];
 int instruccionActual=0;
-bool ejecutarInstruccion=true;
+bool ejecutarInstruccion[NUMANIDADOS];
+int ifActual=0;
 bool errorHabitacion=false;
 extern FILE* yyin;
 extern FILE* yyout;
+
+
+
 //definición de procedimientos auxiliares
 void yyerror(const char* s){         /*    llamada por cada error sintactico de yacc */
 	
@@ -223,7 +228,7 @@ inicio: salto blVariables  blMuebles listaHabitaciones
 
 //BLOQUE INICIAL DE VARIABLES
 blVariables:      
-      |     VARIABLES 	salto	listaDeclaraciones  {cout<<"VariaAAbles"<<endl;}
+      |     VARIABLES 	salto	listaDeclaraciones 
       ;
 
 listaDeclaraciones:     declaracion 
@@ -290,23 +295,29 @@ defHabitacion:        HABITACION '(' expr ',' expr ')' CADENA ':' salto {if(!$3.
                                                                         else{
                                                                               setError("Las dimensiones de la habitación deben ser enteras");
                                                                               errorHabitacion=true;
+                                                                              semanticError();
                                                                         }
                                                                         }
 
-                                                                        listaInstrucciones FINHABITACION salto {        
-                                                                                                                  if(!errorHabitacion){      
-                                                                                                                        
-                                                                                                                        instrucciones[0].addInstruccion("\t// Pausa final de habitación\n"
-                                                                                                                        "\tpausaAmu(1.5);");          
-                                                                                                                        instrucciones[0].printCola(yyout); 
-                                                                                                                        instrucciones[0].vaciarCola();   
-                                                                                                                        instrucciones[1].vaciarCola();   
-                                                                                                                  }                                                                                        
-                                                                                                                        else{
-                                                                                                                        instrucciones[0].vaciarCola();
-                                                                                                                        instrucciones[1].vaciarCola();
-                                                                                                                        }
-                                                                                                                  }//Comprobar que expr son ints y pasarlos
+                                                                        listaInstrucciones FINHABITACION salto {      
+
+                                                                        if(!errorHabitacion){      
+                                                                              
+                                                                              instrucciones[0].addInstruccion("\t// Pausa final de habitación\n"
+                                                                              "\tpausaAmu(1.5);");          
+                                                                              instrucciones[0].printCola(yyout); 
+                                                                              for(int i=0; i<NUMANIDADOS; i++){//Vaciar las colas de instrucciones anidadas (por si acaso)
+                                                                                    instrucciones[i].vaciarCola();
+                                                                              }
+                                                                              instruccionActual=0; //Reiniciar el contador de instrucciones por si acaso
+                                                                              ifActual=0; //Reiniciar la flag if Actual de instrucciones por si acaso
+                                                                        }                                                                                        
+                                                                        else{
+                                                                              for(int i=0; i<NUMANIDADOS; i++){//Vaciar las colas de instrucciones anidadas (por si acaso)
+                                                                                    instrucciones[i].vaciarCola();
+                                                                              }
+                                                                        }
+                                                                        }//Comprobar que expr son ints y pasarlos
                                                                         
                   ;
 
@@ -315,7 +326,7 @@ listaInstrucciones:     listaInstrucciones instruccion {semanticError();}
                   ;
 
 instruccion:      asignacion salto
-            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto {if(ejecutarInstruccion&&!errorHabitacion){mActual=muebles.getMueble($3);
+            |     SITUAR '(' NOMBRE ',' expr ',' expr ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){mActual=muebles.getMueble($3);
                                                                   if(mActual.forma==FERROR){
                                                                         sprintf(msgMid, "El mueble %s no está definido", $3);
                                                                         setError(msgMid);
@@ -331,24 +342,36 @@ instruccion:      asignacion salto
                                                                               instrucciones[instruccionActual].addInstruccion("\tcirculoAmu(" + to_string((int)$5.valor) + ", " + to_string((int)$7.valor) + ", " + floatToString(mActual.medida.radio) + ", " + colorToString(mActual.color) + ");");
                                                                         }
                                                                   }
+                                                                  semanticError();
                                                                   }}
-            |     PAUSA '(' expr ')' salto {if(ejecutarInstruccion&&!errorHabitacion){instrucciones[instruccionActual].addInstruccion("\tpausaAmu(" + floatToString($3.valor) + ");");}}
-            |     MENSAJE '(' CADENA ')' salto {if(ejecutarInstruccion&&!errorHabitacion){instrucciones[instruccionActual].addInstruccion("\t// "+ string($3).erase(0,1));}}
-            |     REPETIR {instruccionActual=1;} expr '{' salto listaInstrucciones '}' salto {        instrucciones[0].printCola(yyout);
-                                                                                                      instrucciones[1].printCola(yyout, $3.valor);
-                                                                                                      instrucciones[1].vaciarCola();
-                                                                                                      instruccionActual=0;}
-            |     SI '(' exBool ')' {ejecutarInstruccion=$3;} condicional salto
+            |     PAUSA '(' expr ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){instrucciones[instruccionActual].addInstruccion("\tpausaAmu(" + floatToString($3.valor) + ");");}}
+            |     MENSAJE '(' CADENA ')' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion){instrucciones[instruccionActual].addInstruccion("\t// "+ string($3).erase(0,1));}}
+            |     
+            |     REPETIR expr {instruccionActual++; 
+                                if($2.esReal){
+                                    setError("La instrucción repetir debe ir acompañada de un entero");
+                                    semanticError();
+                                    }
+                              } 
+                  '{' salto listaInstrucciones '}' salto {if(ejecutarInstruccion[ifActual]&&!errorHabitacion&&!$2.esReal){
+                                                                  for(int i=0; i<$2.valor; i++){
+                                                                        instrucciones[instruccionActual-1].anidarCola(instrucciones[instruccionActual]);
+                                                                  }
+                                                            }
+                                                            instrucciones[instruccionActual].vaciarCola();
+                                                            instruccionActual--;
+                                                            }
+            |     SI '(' exBool ')' {ifActual++; if(ejecutarInstruccion[ifActual-1]){ejecutarInstruccion[ifActual]=$3;}else{ejecutarInstruccion[ifActual]=false;}} '{' salto listaInstrucciones '}' salto sino_opcional {ejecutarInstruccion[ifActual]=true; ifActual--;}
             |     error	salto		{yyerrok;}   
             ;
 
-condicional:      '{' salto listaInstrucciones '}' {ejecutarInstruccion=true;}
-            |     '{' salto listaInstrucciones '}' SINO {ejecutarInstruccion=!ejecutarInstruccion;} '{' salto listaInstrucciones '}' {ejecutarInstruccion=true;}
+sino_opcional:   
+            |    SINO {if(ejecutarInstruccion[ifActual-1]){ejecutarInstruccion[ifActual]=!ejecutarInstruccion[ifActual];}} '{' salto listaInstrucciones '}' salto
             ;
 
 //Elementos recurrentes
 
-asignacion:   ID ASIGNATION exBool   {if(!semanticError()){
+asignacion:   ID ASIGNATION exBool   {if(!semanticError()&&ejecutarInstruccion[ifActual]){
                                                 errorType=variables.putVar($1, $3);
                                                 if(errorType==-2){
                                                       sprintf(msgMid, "La variable %s es de tipo Booleano y no se le puede asignar este valor", $1);
@@ -362,7 +385,7 @@ asignacion:   ID ASIGNATION exBool   {if(!semanticError()){
                                                 }
                                           }
 
-            | ID ASIGNATION expr    {if(!semanticError()){
+            | ID ASIGNATION expr    {if(!semanticError()&&ejecutarInstruccion[ifActual]){
                                                 if(!$3.esReal){
                                                       errorType=variables.putVar($1, (int)$3.valor);
                                                       if(errorType==-2){
@@ -528,6 +551,9 @@ expr:   ID                   {actual=variables.getVar($1);
 
 int main(int argc, char* argv[]) {
      
+      for(int i=0; i<NUMANIDADOS; i++){
+            ejecutarInstruccion[i]=true;
+      }
      n_lineas = 0;
 
     if (argc != 2) {

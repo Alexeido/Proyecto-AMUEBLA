@@ -39,3 +39,12 @@ void ColaInstrucciones::printCola(FILE* YYOUT, int n) {
         }
     }
 }
+
+void ColaInstrucciones::anidarCola(ColaInstrucciones hijo) {
+    ColaInstrucciones colaInstrucciones = hijo;
+    while (!colaInstrucciones.cola.empty()) {
+        string instruccion = colaInstrucciones.cola.front();
+        colaInstrucciones.cola.pop();
+        cola.push(instruccion);
+    }
+}
